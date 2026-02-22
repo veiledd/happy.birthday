@@ -12,22 +12,22 @@
             font-family: 'UnifrakturCook', cursive;
             color: #ff1a1a;
             text-align: center;
-            overflow-x: hidden;
+            overflow: hidden;
             background: #000;
         }
 
-        /* Heartbeat background */
+        /* FULL SCREEN HEARTBEAT */
         .bg {
             position: fixed;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 50% 50%, #330000, #000000 70%);
-            animation: heartbeat 1.2s infinite;
+            background: linear-gradient(135deg, #330000, #000000);
+            animation: fullPulse 1.2s infinite;
             z-index: -1;
-            transition: filter 0.3s, transform 0.3s;
+            transform-origin: center center;
         }
 
-        @keyframes heartbeat {
+        @keyframes fullPulse {
             0% { transform: scale(1); filter: brightness(1); }
             25% { transform: scale(1.05); filter: brightness(1.2); }
             50% { transform: scale(1); filter: brightness(1); }
