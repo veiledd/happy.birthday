@@ -3,37 +3,42 @@
 <head>
     <title>Happy Birthday 🩸</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+    <!-- Classy gothic fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=IM+Fell+English:wght@400&display=swap" rel="stylesheet">
 
     <style>
         body {
             margin: 0;
-            font-family: 'Creepster', cursive;
+            font-family: 'UnifrakturCook', cursive;
             color: #ff1a1a;
             text-align: center;
             overflow-x: hidden;
-            background: black;
+            background: #000;
         }
 
-        /* ANIMATED BACKGROUND */
+        /* Heartbeat background */
         .bg {
             position: fixed;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 50% 50%, #300000, #000000 70%);
-            animation: pulse 5s infinite alternate;
+            background: radial-gradient(circle at 50% 50%, #330000, #000000 70%);
+            animation: heartbeat 1.2s infinite;
             z-index: -1;
+            transition: filter 0.3s, transform 0.3s;
         }
 
-        @keyframes pulse {
-            0% { filter: brightness(1); }
-            100% { filter: brightness(1.4); }
+        @keyframes heartbeat {
+            0% { transform: scale(1); filter: brightness(1); }
+            25% { transform: scale(1.05); filter: brightness(1.2); }
+            50% { transform: scale(1); filter: brightness(1); }
+            75% { transform: scale(1.05); filter: brightness(1.2); }
+            100% { transform: scale(1); filter: brightness(1); }
         }
 
         h1 {
             margin-top: 15%;
             font-size: 70px;
-            text-shadow: 0 0 20px red;
+            text-shadow: 0 0 25px red;
         }
 
         .button {
@@ -53,48 +58,49 @@
             box-shadow: 0 0 20px red;
         }
 
-        /* LETTER STYLE */
+        /* LETTER STYLE: blood-stained parchment */
         .letter {
             display: none;
             margin: 50px auto;
             width: 60%;
-            background: #111;
-            color: white;
-            padding: 30px;
-            border: 2px solid red;
-            box-shadow: 0 0 20px red;
-            font-family: Arial, sans-serif;
+            background: linear-gradient(180deg, #220000 0%, #330000 100%);
+            color: #fff5e6;
+            padding: 40px;
+            border: 3px solid #ff1a1a;
+            box-shadow: 0 0 30px red inset;
+            font-family: 'IM Fell English', serif;
             animation: fadeIn 1.5s forwards;
+            line-height: 1.7;
+            font-size: 18px;
+            transform: rotate(-1deg);
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: scale(0.9) rotate(-1deg); }
+            to { opacity: 1; transform: scale(1) rotate(-1deg); }
         }
     </style>
 </head>
 
 <body>
 
-<div class="bg"></div>
+<div class="bg" id="bg"></div>
 
 <h1>HAPPY BIRTHDAY 🩸</h1>
 
-<button class="button" onclick="openLetter()">Open Your Letter</button>
+<button class="button" onmouseover="speedUpHeartbeat()" onmouseout="slowHeartbeat()" onclick="openLetter()">Open Your Letter</button>
 
 <div class="letter" id="birthdayLetter">
     <h2>To My Favorite Chaos Gremlin,</h2>
     <p>
-        Another year of you being loud, iconic, and slightly unhinged.
-        The world survived. Barely.
+        Another year of you being loud, iconic, and slightly unhinged. The world survived. Barely.
     </p>
     <p>
-        I hope this year hits harder than your favorite breakdown.
-        I hope it screams louder than the speakers at full volume.
-        And I hope you never lose that fire that makes you YOU.
+        I hope this year hits harder than your favorite breakdown, screams louder than the speakers at full volume, 
+        and makes your fire burn brighter than ever.
     </p>
     <p>
-        Stay feral. Stay legendary.
+        Stay feral. Stay legendary. And never lose that dark spark that makes you <em>you</em>.
     </p>
     <p>
         — Your Ride or Die 🖤
@@ -104,6 +110,17 @@
 <script>
 function openLetter() {
     document.getElementById("birthdayLetter").style.display = "block";
+}
+
+// Heartbeat speed control
+const bg = document.getElementById("bg");
+
+function speedUpHeartbeat() {
+    bg.style.animationDuration = "0.6s"; // faster pulse
+}
+
+function slowHeartbeat() {
+    bg.style.animationDuration = "1.2s"; // normal pulse
 }
 </script>
 
