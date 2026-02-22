@@ -28,22 +28,28 @@
        - inset:0 ensures the element literally fills the viewport
        - multiple radial gradients layered + background-position animation create "living" texture
     */
-  .bg {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0; /* change from -2 to 0 */
-  transform-origin: center center;
-  background-image:
-    radial-gradient(circle at 40% 45%, rgba(120,0,0,0.25) 0%, rgba(80,0,0,0.14) 18%, transparent 40%),
-    radial-gradient(circle at 60% 55%, rgba(90,0,0,0.22) 0%, rgba(50,0,0,0.18) 22%, transparent 48%),
-    radial-gradient(circle at 50% 48%, #4d0000 0%, #2b0000 30%, #120000 60%, #000000 100%);
-  background-size: 220% 220%, 210% 210%, 100% 100%;
-  background-blend-mode: overlay, multiply, normal;
-  animation: fleshPulse 1.4s ease-in-out infinite, bgDrift 9s linear infinite;
-  filter: contrast(1.05);
-}
+    .bg {
+      position: fixed;
+      inset: 0;                 /* top:0; right:0; bottom:0; left:0; */
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      transform-origin: center center;
+
+      /* layered radial gradients to give depth (blood, muscle, shadow) */
+      background-image:
+        radial-gradient(circle at 40% 45%, rgba(120,0,0,0.25) 0%, rgba(80,0,0,0.14) 18%, transparent 40%),
+        radial-gradient(circle at 60% 55%, rgba(90,0,0,0.22) 0%, rgba(50,0,0,0.18) 22%, transparent 48%),
+        radial-gradient(circle at 50% 48%, #4d0000 0%, #2b0000 30%, #120000 60%, #000000 100%);
+
+      /* make gradients larger than viewport so shifting feels organic */
+      background-size: 220% 220%, 210% 210%, 100% 100%;
+      background-blend-mode: overlay, multiply, normal;
+
+      /* two animations:
+         1) full pulse (scale+brightness)
+         2) slow drift of gradient positions to feel like tissue shifting
+      */
       animation:
         fleshPulse 1.4s ease-in-out infinite,
         bgDrift 9s linear infinite;
