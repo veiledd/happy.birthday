@@ -11,8 +11,6 @@
       height: 100%;
       margin: 0;
       overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
       background: #000;
       position: relative;
     }
@@ -24,25 +22,53 @@
     }
 
     /* =========================
-       PULSING HEART BACKGROUND (full screen)
+       SIMPLE CSS HEART BACKGROUND
     ========================== */
     .heart-bg {
       position: fixed;
       inset: 0;
       z-index: 0;
-      background: url('https://i.postimg.cc/BjzvyWvP/bb5657d3e72ad7581cb78a7d6774c660-removebg-preview.png') no-repeat center center;
-      background-size: cover; /* fill entire viewport */
-      animation: heartBeat 1.2s ease-in-out infinite;
-      opacity: 0.7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       pointer-events: none;
     }
 
+    .heart {
+      width: 200px;
+      height: 180px;
+      background-color: #ff1a1a;
+      position: relative;
+      transform: rotate(-45deg);
+      animation: heartBeat 1s ease-in-out infinite;
+    }
+
+    .heart::before,
+    .heart::after {
+      content: "";
+      position: absolute;
+      width: 200px;
+      height: 180px;
+      background-color: #ff1a1a;
+      border-radius: 50%;
+    }
+
+    .heart::before {
+      top: -100px;
+      left: 0;
+    }
+
+    .heart::after {
+      left: 100px;
+      top: 0;
+    }
+
     @keyframes heartBeat {
-      0%   { transform: scale(1); }
-      25%  { transform: scale(1.08); }
-      50%  { transform: scale(1); }
-      75%  { transform: scale(1.08); }
-      100% { transform: scale(1); }
+      0%   { transform: rotate(-45deg) scale(1); }
+      25%  { transform: rotate(-45deg) scale(1.1); }
+      50%  { transform: rotate(-45deg) scale(1); }
+      75%  { transform: rotate(-45deg) scale(1.1); }
+      100% { transform: rotate(-45deg) scale(1); }
     }
 
     /* =========================
@@ -110,7 +136,9 @@
 
 <body>
 
-  <div class="heart-bg"></div>
+  <div class="heart-bg">
+    <div class="heart"></div>
+  </div>
 
   <h1>HAPPY BIRTHDAY !!</h1>
 
