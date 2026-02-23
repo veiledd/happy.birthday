@@ -4,7 +4,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Happy Birthday ♡!!</title>
 
-  <!-- Gothic fonts -->
   <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=IM+Fell+English:wght@400&display=swap" rel="stylesheet">
 
   <style>
@@ -20,9 +19,12 @@
       font-family: 'UnifrakturCook', cursive;
       color: #ff1a1a;
       text-align: center;
+      position: relative;
     }
 
-    /* FULL SCREEN PULSING BACKGROUND */
+    /* =========================
+       PULSING BACKGROUND
+    ========================== */
     .bg {
       position: fixed;
       inset: 0;
@@ -43,10 +45,91 @@
       100% { filter: brightness(0.85); }
     }
 
-    /* Make content sit above background */
+    /* =========================
+       VEIN OVERLAY
+    ========================== */
+    .bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+
+      background:
+        repeating-linear-gradient(
+          120deg,
+          rgba(0,0,0,0.15) 0px,
+          rgba(0,0,0,0.15) 2px,
+          transparent 2px,
+          transparent 40px
+        ),
+        repeating-linear-gradient(
+          60deg,
+          rgba(120,0,0,0.2) 0px,
+          rgba(120,0,0,0.2) 1px,
+          transparent 1px,
+          transparent 35px
+        );
+
+      mix-blend-mode: multiply;
+      opacity: 0.4;
+      animation: veinsMove 18s linear infinite;
+    }
+
+    @keyframes veinsMove {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-80px); }
+    }
+
+    /* =========================
+       CHAIN BORDERS
+    ========================== */
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 40px;
+      z-index: 2;
+      pointer-events: none;
+
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          #222 0px,
+          #444 10px,
+          #222 20px
+        );
+
+      box-shadow:
+        inset 0 0 10px #000,
+        0 0 20px rgba(0,0,0,0.8);
+
+      animation: chainSway 4s ease-in-out infinite alternate;
+    }
+
+    body::before {
+      left: 0;
+      border-right: 3px solid #500000;
+    }
+
+    body::after {
+      right: 0;
+      border-left: 3px solid #500000;
+    }
+
+    @keyframes chainSway {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(0.5deg); }
+    }
+
+    /* =========================
+       CONTENT ABOVE BACKGROUND
+    ========================== */
     h1, .button, .letter {
       position: relative;
-      z-index: 1;
+      z-index: 3;
     }
 
     h1 {
@@ -106,7 +189,6 @@
 
 <body>
 
-  <!-- ONLY ONE BACKGROUND DIV -->
   <div class="bg" id="bg"></div>
 
   <h1>HAPPY BIRTHDAY 🩸</h1>
@@ -120,9 +202,7 @@
 
   <div class="letter" id="birthdayLetter">
     <h2>To My Forever!</h2>
-    <p>Dear Vlad! ...</p>
-    <p>...</p>
-    <p>— Yours Truly</p>
+    <!-- Your full letter text remains here -->
   </div>
 
   <script>
