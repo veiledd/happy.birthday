@@ -24,24 +24,69 @@
     }
 
     /* =========================
-       PULSING HEART BACKGROUND
+       SOFT BACKGROUND GLOW
     ========================== */
     .bg {
       position: fixed;
       inset: 0;
       z-index: 0;
       background: radial-gradient(circle at center,
-        #b30000 0%,
-        #5c0000 40%,
-        #2a0000 75%,
-        #120000 100%);
-      animation: pulse 1.2s ease-in-out infinite;
+        #6b0000 0%,
+        #450000 35%,
+        #230000 70%,
+        #0b0000 100%);
+      /* subtle slow breathing to support the SVG heart */
+      animation: bgBreath 4s ease-in-out infinite;
+      filter: saturate(1.05);
     }
 
-    @keyframes pulse {
-      0%   { filter: brightness(0.85); }
-      50%  { filter: brightness(1.5); }
-      100% { filter: brightness(0.85); }
+    @keyframes bgBreath {
+      0%   { filter: brightness(0.9); }
+      50%  { filter: brightness(1.08); }
+      100% { filter: brightness(0.9); }
+    }
+
+    /* =========================
+       REALISTIC SVG HEART (centered, animated)
+    ========================== */
+    .heart-wrap {
+      position: fixed;
+      left: 50%;
+      top: 42%;
+      transform: translate(-50%, -50%);
+      z-index: 0;               /* behind UI but above base bg */
+      width: min(40vmin, 420px);
+      max-width: 520px;
+      opacity: 0.95;
+      pointer-events: none;     /* never block clicks */
+      filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6));
+      will-change: transform, filter;
+      /* start the heartbeat animation (lub-dub) */
+      animation: heartBeat 1.25s cubic-bezier(.2,.6,.2,1) infinite;
+      transform-origin: center center;
+    }
+
+    /* LUB-DUB rhythm keyframes (double beat feel) */
+    @keyframes heartBeat {
+      0%   { transform: translate(-50%, -50%) scale(1); }
+      10%  { transform: translate(-50%, -50%) scale(1.06); }  /* lub */
+      20%  { transform: translate(-50%, -50%) scale(0.97); }
+      30%  { transform: translate(-50%, -50%) scale(1.14); }  /* dub (stronger) */
+      45%  { transform: translate(-50%, -50%) scale(1); }
+      60%  { transform: translate(-50%, -48%) scale(1.06); }  /* small afterbeat */
+      80%  { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
+
+    /* slight color pulse for the SVG fill (blood flow illusion) */
+    .heart-red {
+      animation: bloodFlow 1.25s linear infinite;
+    }
+    @keyframes bloodFlow {
+      0%   { fill: #b00000; }
+      30%  { fill: #ff1a1a; }
+      60%  { fill: #9a0000; }
+      100% { fill: #b00000; }
     }
 
     /* =========================
@@ -49,33 +94,38 @@
     ========================== */
     h1, .button, .letter {
       position: relative;
-      z-index: 1;
+      z-index: 2; /* above heart + bg */
     }
 
     h1 {
       margin: 0;
-      padding-top: 10vh;
+      padding-top: 8vh;
       font-size: clamp(34px, 6vw, 72px);
       text-shadow: 0 0 28px rgba(255,20,20,0.9);
       line-height: 1;
     }
 
     .button {
-      margin-top: 5vh;
-      padding: 16px 36px;
+      margin-top: 4vh;
+      padding: 14px 34px;
       font-size: 18px;
       background: rgba(0,0,0,0.65);
       color: #ff2a2a;
       border: 2px solid #ff2a2a;
       cursor: pointer;
-      transition: 0.25s ease;
+      transition: transform .12s ease, box-shadow .12s ease;
       backdrop-filter: blur(2px);
     }
 
     .button:hover {
+      transform: translateY(-2px);
       background: #ff2a2a;
       color: #080808;
       box-shadow: 0 0 24px rgba(255,20,20,0.7);
+    }
+
+    .button:active {
+      transform: translateY(0);
     }
 
     /* =========================
@@ -83,30 +133,31 @@
     ========================== */
     .letter {
       display: none;
-      margin: 40px auto;
+      margin: 36px auto;
       width: min(900px, 86%);
-      padding: 36px;
+      padding: 34px;
       line-height: 1.7;
       font-size: 18px;
       font-family: 'IM Fell English', serif;
       color: #fff6e6;
-      background: linear-gradient(180deg, #2a0000 0%, #3b0000 40%, #1b0000 100%);
-      border: 3px solid #b80f0f;
-      box-shadow: 0 0 40px rgba(180,10,10,0.45) inset, 0 10px 30px rgba(0,0,0,0.7);
+      background: linear-gradient(180deg, #2a0000 0%, #361212 40%, #1b0000 100%);
+      border: 3px solid #7a0b0b;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6), inset 0 0 30px rgba(120,10,10,0.25);
       transform: rotate(-0.6deg);
-      animation: fadeIn 1s ease forwards;
+      animation: fadeIn 0.9s ease forwards;
       position: relative;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.96) rotate(-1deg); }
+      from { opacity: 0; transform: scale(0.98) rotate(-1deg); }
       to   { opacity: 1; transform: scale(1) rotate(-0.6deg); }
     }
 
     @media (max-width: 600px) {
-      h1 { padding-top: 8vh; font-size: 36px; }
-      .button { padding: 12px 20px; }
-      .letter { padding: 20px; font-size: 16px; width: 92%; }
+      h1 { padding-top: 6vh; font-size: 34px; }
+      .button { padding: 10px 18px; }
+      .letter { padding: 18px; font-size: 16px; width: 94%; transform: rotate(0deg); }
+      .heart-wrap { width: min(60vmin, 320px); top: 46%; }
     }
   </style>
 </head>
@@ -114,6 +165,47 @@
 <body>
 
   <div class="bg" id="bg"></div>
+
+  <!-- Inline SVG heart (anatomical-stylized) -->
+  <div class="heart-wrap" aria-hidden="true">
+    <svg viewBox="0 0 320 360" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#ff3b3b"/>
+          <stop offset="55%" stop-color="#b00000"/>
+          <stop offset="100%" stop-color="#4a0000"/>
+        </linearGradient>
+        <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="6" result="b"/>
+          <feMerge>
+            <feMergeNode in="b"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- main ventricles / body -->
+      <g transform="translate(20,10)" filter="url(#soft)">
+        <!-- left lobe -->
+        <path class="heart-red" d="M120 60 C100 20, 40 20, 48 88 C52 120, 88 160, 120 196 C150 160, 184 120, 192 88 C200 20, 140 20, 120 60 Z"
+              fill="url(#g1)" stroke="#3b0000" stroke-width="2"/>
+
+        <!-- right lobe -->
+        <path class="heart-red" d="M200 60 C220 20, 280 20, 272 88 C268 120, 232 160, 200 196 C170 160, 136 120, 128 88 C120 20, 180 20, 200 60 Z"
+              fill="url(#g1)" stroke="#3b0000" stroke-width="2" opacity="0.98"/>
+
+        <!-- center lower ventricle shape -->
+        <path d="M120 196 C160 220, 200 228, 200 280 C200 320, 160 340, 120 320 C80 340, 40 320, 40 280 C40 228, 80 220, 120 196 Z"
+              fill="url(#g1)" stroke="#3b0000" stroke-width="2" opacity="0.95"/>
+
+        <!-- aorta / arteries (stylized) -->
+        <path d="M150 28 C140 0, 170 -10, 180 10 C196 36, 190 48, 170 54"
+              stroke="#5a0000" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.9"/>
+        <path d="M172 22 C190 -8, 220 -6, 228 16"
+              stroke="#6a0000" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.9"/>
+      </g>
+    </svg>
+  </div>
 
   <h1>HAPPY BIRTHDAY !!</h1>
 
@@ -126,14 +218,13 @@
 
   <div class="letter" id="birthdayLetter">
     <h2>To My Forever! </h2>
-    <p> </em> Dear Vlad!</em>
-      I’m 555 and you’re my 666, perfectly chaotic and completely mine. Even from miles away, you cut through the noise like a pair of scissors, sharp and precise, leaving marks that only I can see. Every time I think of you, it feels like a song shaking the world, and somehow, in the middle of all this chaos, I find peace knowing you exist.
+    <p> Dear Vlad! I’m 555 and you’re my 666, perfectly chaotic and completely mine. Even from miles away, you cut through the noise like a pair of scissors, sharp and precise, leaving marks that only I can see. Every time I think of you, it feels like a song shaking the world, and somehow, in the middle of all this chaos, I find peace knowing you exist.
     </p>
     <p>
       I keep replaying that night we met in my head!! it was a bit awkward but still really fun!! i loved how intresting you were, and still are. I can still feel the way time warped around us, I hope we get a thousand more nights like that even if it’s through messages or calls where the world fades and it’s just us, pulsing together like a drumbeat too loud to ignore. You are the pulse I follow, the fire I can’t escape, and somehow, I never want to. Even across the distance, you make everything sharper, brighter, and more alive than I ever imagined it could be.
     </p>
     <p>
-      I love the little things I notice about <em>you</em>., even from afar: the way your words land, the way your presence lingers in my mind long after we’ve stopped talking, the chaos and calm that seem to follow you like a shadow. You are fire and shadow, scream and silence, and somehow, even through screens and signals, <em>.you make me feel seen, understood, and untamed.</em>
+      I love the little things I notice about <em>you</em>., even from afar: the way your words land, the way your presence lingers in my mind long after we’ve stopped talking, the chaos and calm that seem to follow you like a shadow. You are fire and shadow, scream and silence, and somehow, even through screens and signals, you make me feel seen, understood, and untamed.
     </p>
     <p>
       I can’t promise the world, but I can promise this: my heart is yours, in full, in fragments, and in every space you leave behind. Even when the distance feels impossible. I’ll be here—sharp, steady, and yours. And maybe one day soon, we won’t need screens or messages to reach each other. Until then, I’ll carry you in every thought, every heartbeat, every restless night.
@@ -145,6 +236,7 @@
     const letter = document.getElementById("birthdayLetter");
     const button = document.querySelector(".button");
     const bg = document.getElementById("bg");
+    const heartWrap = document.querySelector(".heart-wrap");
 
     let clickCount = 0; // count clicks
 
@@ -153,6 +245,9 @@
 
       // Pop-up if too many clicks
       if (clickCount >= 5) {
+        // playful shake + alert
+        button.classList.add('panic');
+        setTimeout(()=> button.classList.remove('panic'), 600);
         alert("STOP!!");
         clickCount = 0;
         button.textContent = "!! Open Your Letter";
@@ -178,11 +273,14 @@
     }
 
     function speedUpHeartbeat() {
-      bg.style.animationDuration = "0.6s";
+      // speed heart + background slightly
+      heartWrap.style.animationDuration = "0.6s";
+      bg.style.animationDuration = "2.4s"; // background breath speeds a bit
     }
 
     function slowHeartbeat() {
-      bg.style.animationDuration = "1.2s";
+      heartWrap.style.animationDuration = "1.25s";
+      bg.style.animationDuration = "4s";
     }
   </script>
 
