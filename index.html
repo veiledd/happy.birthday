@@ -28,71 +28,33 @@
        - inset:0 ensures the element literally fills the viewport
        - multiple radial gradients layered + background-position animation create "living" texture
     */
-    .bg {
-      position: fixed;
-      inset: 0;                 /* top:0; right:0; bottom:0; left:0; */
-      width: 100%;
-      height: 100%;
-      z-index: -2;
-      transform-origin: center center;
+ .bg {
+  position: fixed;
+  top: -10%;
+  left: -10%;
+  width: 120%;
+  height: 120%;
+  z-index: -1;
 
-      /* layered radial gradients to give depth (blood, muscle, shadow) */
-      background-image:
-        radial-gradient(circle at 40% 45%, rgba(120,0,0,0.25) 0%, rgba(80,0,0,0.14) 18%, transparent 40%),
-        radial-gradient(circle at 60% 55%, rgba(90,0,0,0.22) 0%, rgba(50,0,0,0.18) 22%, transparent 48%),
-        radial-gradient(circle at 50% 48%, #4d0000 0%, #2b0000 30%, #120000 60%, #000000 100%);
+  background:
+    radial-gradient(circle at 50% 50%, #5c0000 0%, #2a0000 40%, #000000 80%),
+    radial-gradient(circle at 30% 40%, rgba(150,0,0,0.4) 0%, transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(90,0,0,0.5) 0%, transparent 60%);
 
-      /* make gradients larger than viewport so shifting feels organic */
-      background-size: 220% 220%, 210% 210%, 100% 100%;
-      background-blend-mode: overlay, multiply, normal;
+  background-blend-mode: overlay;
+  filter: contrast(1.2) saturate(1.1);
 
-      /* two animations:
-         1) full pulse (scale+brightness)
-         2) slow drift of gradient positions to feel like tissue shifting
-      */
-      animation:
-        fleshPulse 1.4s ease-in-out infinite,
-        bgDrift 9s linear infinite;
-      filter: contrast(1.05);
-    }
+  animation: fullPulse 1.3s ease-in-out infinite;
+}
 
-    /* subtle vascular overlay (vein-like wisps) */
-    .bg::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-      background-image:
-        radial-gradient(circle at 30% 25%, rgba(255,80,80,0.03), transparent 12%),
-        radial-gradient(circle at 70% 75%, rgba(200,20,20,0.03), transparent 12%),
-        linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0.05));
-      mix-blend-mode: overlay;
-      transform-origin: center;
-      animation: veins 12s ease-in-out infinite alternate;
-    }
-
-    @keyframes fleshPulse {
-      0%   { transform: scale(1); filter: brightness(0.95) saturate(0.95); }
-      18%  { transform: scale(1.03); filter: brightness(1.18) saturate(1.05); }
-      35%  { transform: scale(1); filter: brightness(1) saturate(1); }
-      53%  { transform: scale(1.04); filter: brightness(1.15) saturate(1.06); }
-      70%  { transform: scale(1); filter: brightness(1) saturate(1); }
-      100% { transform: scale(1.02); filter: brightness(1.08) saturate(1.02); }
-    }
-
-    @keyframes bgDrift {
-      0%   { background-position: 0% 0%, 0% 0%, 50% 50%; }
-      25%  { background-position: 10% 8%, 90% 12%, 48% 52%; }
-      50%  { background-position: 50% 40%, 60% 55%, 52% 48%; }
-      75%  { background-position: 80% 70%, 30% 80%, 49% 51%; }
-      100% { background-position: 100% 100%, 0% 100%, 50% 50%; }
-    }
-
-    @keyframes veins {
-      0% { transform: translateY(0) scale(1); opacity: 0.65; }
-      100% { transform: translateY(-6px) scale(1.02); opacity: 0.85; }
-    }
+@keyframes fullPulse {
+  0%   { transform: scale(1); filter: brightness(0.95) contrast(1.1); }
+  15%  { transform: scale(1.05); filter: brightness(1.25) contrast(1.2); }
+  30%  { transform: scale(1); }
+  45%  { transform: scale(1.06); filter: brightness(1.3); }
+  60%  { transform: scale(1); }
+  100% { transform: scale(1.02); }
+}
 
     /* Page content */
     h1 {
