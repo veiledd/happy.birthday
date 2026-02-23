@@ -24,48 +24,25 @@
     }
 
     /* =========================
-       PULSING HEART BACKGROUND
+       PULSING HEART BACKGROUND (full screen)
     ========================== */
-    .bg {
+    .heart-bg {
       position: fixed;
       inset: 0;
       z-index: 0;
-      background: radial-gradient(circle at center,
-        #b30000 0%,
-        #5c0000 40%,
-        #2a0000 75%,
-        #120000 100%);
-      animation: pulse 1.2s ease-in-out infinite;
-    }
-
-    /* Heart image pulsing */
-    .heart-bg {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      width: 250px;
-      height: 250px;
-      transform: translate(-50%, -50%);
-      z-index: 0;
-      pointer-events: none;
-      background: <a href='https://postimg.cc/BjzvyWvP' target='_blank'><img src='https://i.postimg.cc/BjzvyWvP/bb5657d3e72ad7581cb78a7d6774c660-removebg-preview.png' border='0' alt='bb5657d3e72ad7581cb78a7d6774c660-removebg-preview'></a> no-repeat center center;
-      background-size: contain;
+      background: url('https://i.postimg.cc/BjzvyWvP/bb5657d3e72ad7581cb78a7d6774c660-removebg-preview.png') no-repeat center center;
+      background-size: cover; /* fill entire viewport */
       animation: heartBeat 1.2s ease-in-out infinite;
-      opacity: 0.9;
-    }
-
-    @keyframes pulse {
-      0%   { filter: brightness(0.85); }
-      50%  { filter: brightness(1.5); }
-      100% { filter: brightness(0.85); }
+      opacity: 0.7;
+      pointer-events: none;
     }
 
     @keyframes heartBeat {
-      0%   { transform: translate(-50%, -50%) scale(1); }
-      25%  { transform: translate(-50%, -50%) scale(1.1); }
-      50%  { transform: translate(-50%, -50%) scale(1); }
-      75%  { transform: translate(-50%, -50%) scale(1.1); }
-      100% { transform: translate(-50%, -50%) scale(1); }
+      0%   { transform: scale(1); }
+      25%  { transform: scale(1.08); }
+      50%  { transform: scale(1); }
+      75%  { transform: scale(1.08); }
+      100% { transform: scale(1); }
     }
 
     /* =========================
@@ -133,12 +110,11 @@
 
 <body>
 
-  <div class="bg" id="bg"></div>
   <div class="heart-bg"></div>
 
   <h1>HAPPY BIRTHDAY !!</h1>
 
-  <button class="button" onmouseover="speedUpHeartbeat()" onmouseout="slowHeartbeat()" onclick="openLetter()">!! Open Your Letter</button>
+  <button class="button" onclick="toggleLetter()">!! Open Your Letter</button>
 
   <div class="letter" id="birthdayLetter">
     <h2>To My Forever! </h2>
@@ -158,35 +134,21 @@
   </div>
 
   <script>
-    const bg = document.getElementById("bg");
     const letter = document.getElementById("birthdayLetter");
-    const button = document.querySelector(".button");
-
     let clickCount = 0;
 
-    function openLetter() {
+    function toggleLetter() {
       clickCount++;
       if (clickCount > 6) {
         alert("STOP!!");
         return;
       }
-      // Toggle display
       if (letter.style.display === "block") {
         letter.style.display = "none";
       } else {
         letter.style.display = "block";
         letter.scrollIntoView({behavior: "smooth", block: "center"});
       }
-    }
-
-    function speedUpHeartbeat() {
-      bg.style.animationDuration = "0.6s";
-      document.querySelector('.heart-bg').style.animationDuration = "0.6s";
-    }
-
-    function slowHeartbeat() {
-      bg.style.animationDuration = "1.2s";
-      document.querySelector('.heart-bg').style.animationDuration = "1.2s";
     }
   </script>
 
