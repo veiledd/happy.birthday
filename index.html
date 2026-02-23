@@ -31,64 +31,8 @@
 .bg {
   position: fixed;
   inset: 0;
+  background: red;
   z-index: -1;
-
-  background:
-    radial-gradient(circle at 50% 50%,
-      #b30000 0%,
-      #6e0000 35%,
-      #3a0000 65%,
-      #1a0000 100%);
-
-  animation: fleshPulse 1.1s ease-in-out infinite;
-}
-
-/* stronger pulse contrast */
-@keyframes fleshPulse {
-  0% {
-    background:
-      radial-gradient(circle at 50% 50%,
-        #8a0000 0%,
-        #4a0000 40%,
-        #260000 70%,
-        #140000 100%);
-  }
-
-  25% {
-    background:
-      radial-gradient(circle at 50% 50%,
-        #ff1a1a 0%,
-        #7a0000 45%,
-        #3a0000 75%,
-        #1a0000 100%);
-  }
-
-  50% {
-    background:
-      radial-gradient(circle at 50% 50%,
-        #8a0000 0%,
-        #4a0000 40%,
-        #260000 70%,
-        #140000 100%);
-  }
-
-  75% {
-    background:
-      radial-gradient(circle at 50% 50%,
-        #ff0000 0%,
-        #8f0000 45%,
-        #400000 80%,
-        #1a0000 100%);
-  }
-
-  100% {
-    background:
-      radial-gradient(circle at 50% 50%,
-        #b30000 0%,
-        #6e0000 35%,
-        #3a0000 65%,
-        #1a0000 100%);
-  }
 }
     /* Page content */
     h1 {
