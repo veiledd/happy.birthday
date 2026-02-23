@@ -15,12 +15,16 @@
       -moz-osx-font-smoothing: grayscale;
       background: #000;
       position: relative;
-    }
-
-    body {
       font-family: 'UnifrakturCook', cursive;
       color: #ff1a1a;
       text-align: center;
+    }
+
+    /* =========================
+       MINI-GAME HEARTS
+    ========================== */
+    #miniGame div {
+      user-select: none;
     }
 
     /* =========================
@@ -35,9 +39,9 @@
         #450000 35%,
         #230000 70%,
         #0b0000 100%);
-      /* subtle slow breathing to support the SVG heart */
       animation: bgBreath 4s ease-in-out infinite;
       filter: saturate(1.05);
+      display: none; /* hidden until mini-game done */
     }
 
     @keyframes bgBreath {
@@ -54,31 +58,29 @@
       left: 50%;
       top: 42%;
       transform: translate(-50%, -50%);
-      z-index: 0;               /* behind UI but above base bg */
+      z-index: 0;
       width: min(40vmin, 420px);
       max-width: 520px;
       opacity: 0.95;
-      pointer-events: none;     /* never block clicks */
+      pointer-events: none;
       filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6));
       will-change: transform, filter;
-      /* start the heartbeat animation (lub-dub) */
       animation: heartBeat 1.25s cubic-bezier(.2,.6,.2,1) infinite;
       transform-origin: center center;
+      display: none; /* hidden until mini-game done */
     }
 
-    /* LUB-DUB rhythm keyframes (double beat feel) */
     @keyframes heartBeat {
       0%   { transform: translate(-50%, -50%) scale(1); }
-      10%  { transform: translate(-50%, -50%) scale(1.06); }  /* lub */
+      10%  { transform: translate(-50%, -50%) scale(1.06); }
       20%  { transform: translate(-50%, -50%) scale(0.97); }
-      30%  { transform: translate(-50%, -50%) scale(1.14); }  /* dub (stronger) */
+      30%  { transform: translate(-50%, -50%) scale(1.14); }
       45%  { transform: translate(-50%, -50%) scale(1); }
-      60%  { transform: translate(-50%, -48%) scale(1.06); }  /* small afterbeat */
+      60%  { transform: translate(-50%, -48%) scale(1.06); }
       80%  { transform: translate(-50%, -50%) scale(1); }
       100% { transform: translate(-50%, -50%) scale(1); }
     }
 
-    /* slight color pulse for the SVG fill (blood flow illusion) */
     .heart-red {
       animation: bloodFlow 1.25s linear infinite;
     }
@@ -94,7 +96,8 @@
     ========================== */
     h1, .button, .letter {
       position: relative;
-      z-index: 2; /* above heart + bg */
+      z-index: 2;
+      display: none; /* hidden until mini-game done */
     }
 
     h1 {
@@ -164,9 +167,16 @@
 
 <body>
 
+  <!-- MINI-GAME LAYER -->
+  <div id="miniGame" style="position:fixed;inset:0;z-index:5;background:#000;">
+    <h2 style="color:#ff2a2a;margin-top:10vh;font-family:'UnifrakturCook',cursive;">
+      Click 3 floating hearts to unlock your letter!
+    </h2>
+  </div>
+
+  <!-- Main Page Elements -->
   <div class="bg" id="bg"></div>
 
-  <!-- Inline SVG heart (anatomical-stylized) -->
   <div class="heart-wrap" aria-hidden="true">
     <svg viewBox="0 0 320 360" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -183,22 +193,13 @@
           </feMerge>
         </filter>
       </defs>
-
-      <!-- main ventricles / body -->
       <g transform="translate(20,10)" filter="url(#soft)">
-        <!-- left lobe -->
         <path class="heart-red" d="M120 60 C100 20, 40 20, 48 88 C52 120, 88 160, 120 196 C150 160, 184 120, 192 88 C200 20, 140 20, 120 60 Z"
               fill="url(#g1)" stroke="#3b0000" stroke-width="2"/>
-
-        <!-- right lobe -->
         <path class="heart-red" d="M200 60 C220 20, 280 20, 272 88 C268 120, 232 160, 200 196 C170 160, 136 120, 128 88 C120 20, 180 20, 200 60 Z"
               fill="url(#g1)" stroke="#3b0000" stroke-width="2" opacity="0.98"/>
-
-        <!-- center lower ventricle shape -->
         <path d="M120 196 C160 220, 200 228, 200 280 C200 320, 160 340, 120 320 C80 340, 40 320, 40 280 C40 228, 80 220, 120 196 Z"
               fill="url(#g1)" stroke="#3b0000" stroke-width="2" opacity="0.95"/>
-
-        <!-- aorta / arteries (stylized) -->
         <path d="M150 28 C140 0, 170 -10, 180 10 C196 36, 190 48, 170 54"
               stroke="#5a0000" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.9"/>
         <path d="M172 22 C190 -8, 220 -6, 228 16"
@@ -209,12 +210,7 @@
 
   <h1>HAPPY BIRTHDAY !!</h1>
 
-  <button class="button" 
-          onmouseover="speedUpHeartbeat()" 
-          onmouseout="slowHeartbeat()" 
-          onclick="toggleLetter()">
-    !! Open Your Letter
-  </button>
+  <button class="button" onclick="toggleLetter()">!! Open Your Letter</button>
 
   <div class="letter" id="birthdayLetter">
     <h2>To My Forever! </h2>
@@ -233,49 +229,68 @@
   </div>
 
   <script>
+    // main page elements
     const letter = document.getElementById("birthdayLetter");
     const button = document.querySelector(".button");
     const bg = document.getElementById("bg");
     const heartWrap = document.querySelector(".heart-wrap");
+    const h1 = document.querySelector('h1');
+    const miniGame = document.getElementById('miniGame');
 
-    let clickCount = 0; // count clicks
+    let clickCount = 0; // button clicks
+    let heartsClicked = 0; // mini-game hearts clicked
+    const heartsToClick = 3; // hearts needed to unlock page
 
+    // toggle letter button
     function toggleLetter() {
       clickCount++;
-
-      // Pop-up if too many clicks
-      if (clickCount >= 5) {
-        // playful shake + alert
-        button.classList.add('panic');
-        setTimeout(()=> button.classList.remove('panic'), 600);
+      if(clickCount >= 5){
         alert("STOP!!");
         clickCount = 0;
         button.textContent = "!! Open Your Letter";
         return;
       }
-
       if (letter.style.display === "block") {
         letter.style.display = "none";
         button.textContent = "!! Open Your Letter";
       } else {
         letter.style.display = "block";
         letter.scrollIntoView({ behavior: "smooth", block: "center" });
-
-        // change button text depending on click
-        const messages = [
-          "!! Open Again?",
-          "!! Really Again?",
-          "!! Again??",
-          "!! Last Time??"
-        ];
+        const messages = ["!! Open Again?", "!! Really Again?", "!! Again??", "!! Last Time??"];
         button.textContent = messages[Math.min(clickCount-1, messages.length-1)];
       }
     }
 
+    // mini-game floating hearts
+    for (let i=0;i<5;i++) {
+      const heart = document.createElement('div');
+      heart.innerHTML = "❤️";
+      heart.style.position = "absolute";
+      heart.style.fontSize = `${20+Math.random()*30}px`;
+      heart.style.top = `${Math.random()*80+10}%`;
+      heart.style.left = `${Math.random()*80+10}%`;
+      heart.style.cursor = "pointer";
+      heart.style.transition = "transform 0.2s ease, opacity 0.4s ease";
+      miniGame.appendChild(heart);
+
+      heart.addEventListener('click', ()=>{
+        heartsClicked++;
+        heart.style.transform = "scale(1.5)";
+        heart.style.opacity = "0";
+        if(heartsClicked >= heartsToClick){
+          // unlock main page
+          miniGame.style.display = "none";
+          bg.style.display = "block";
+          heartWrap.style.display = "block";
+          h1.style.display = "block";
+          button.style.display = "inline-block";
+        }
+      });
+    }
+
     function speedUpHeartbeat() {
-      // speed heart + background slightly
       heartWrap.style.animationDuration = "0.6s";
-      bg.style.animationDuration = "2.4s"; // background breath speeds a bit
+      bg.style.animationDuration = "2.4s";
     }
 
     function slowHeartbeat() {
@@ -283,6 +298,5 @@
       bg.style.animationDuration = "4s";
     }
   </script>
-
 </body>
 </html>
