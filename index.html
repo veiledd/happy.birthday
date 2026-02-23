@@ -28,42 +28,44 @@
        - inset:0 ensures the element literally fills the viewport
        - multiple radial gradients layered + background-position animation create "living" texture
     */
- .bg {
+.bg {
   position: fixed;
-  top: -10%;
-  left: -10%;
-  width: 120%;
-  height: 120%;
+  inset: 0;
   z-index: -1;
 
   background:
-    radial-gradient(circle at 50% 50%, #5c0000 0%, #2a0000 40%, #000000 80%),
-    radial-gradient(circle at 30% 40%, rgba(150,0,0,0.4) 0%, transparent 50%),
-    radial-gradient(circle at 70% 60%, rgba(90,0,0,0.5) 0%, transparent 60%);
+    radial-gradient(circle at 50% 50%, #6e0000 0%, #3b0000 40%, #120000 75%, #000 100%);
 
-  background-blend-mode: overlay;
-  filter: contrast(1.2) saturate(1.1);
-
-  animation: fullPulse 1.3s ease-in-out infinite;
+  animation: fleshPulse 1.2s ease-in-out infinite;
 }
 
-@keyframes fullPulse {
-  0%   { transform: scale(1); filter: brightness(0.95) contrast(1.1); }
-  15%  { transform: scale(1.05); filter: brightness(1.25) contrast(1.2); }
-  30%  { transform: scale(1); }
-  45%  { transform: scale(1.06); filter: brightness(1.3); }
-  60%  { transform: scale(1); }
-  100% { transform: scale(1.02); }
+/* animate COLOR not SIZE */
+@keyframes fleshPulse {
+  0% {
+    background:
+      radial-gradient(circle at 50% 50%, #5a0000 0%, #2a0000 40%, #0d0000 75%, #000 100%);
+  }
+
+  25% {
+    background:
+      radial-gradient(circle at 50% 50%, #950000 0%, #520000 45%, #1a0000 80%, #000 100%);
+  }
+
+  50% {
+    background:
+      radial-gradient(circle at 50% 50%, #5a0000 0%, #2a0000 40%, #0d0000 75%, #000 100%);
+  }
+
+  75% {
+    background:
+      radial-gradient(circle at 50% 50%, #a80000 0%, #5c0000 45%, #1f0000 85%, #000 100%);
+  }
+
+  100% {
+    background:
+      radial-gradient(circle at 50% 50%, #6e0000 0%, #3b0000 40%, #120000 75%, #000 100%);
+  }
 }
-    .bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
-  opacity: 0.1;
-  mix-blend-mode: overlay;
-}
-    
     /* Page content */
     h1 {
       margin: 0;
@@ -122,6 +124,7 @@
   </style>
 </head>
 <body>
+  <div class="bg"></div>
 
   <!-- layered background element -->
   <div class="bg" id="bg"></div>
