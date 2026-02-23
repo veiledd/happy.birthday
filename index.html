@@ -55,7 +55,15 @@
   60%  { transform: scale(1); }
   100% { transform: scale(1.02); }
 }
-
+    .bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
+  opacity: 0.1;
+  mix-blend-mode: overlay;
+}
+    
     /* Page content */
     h1 {
       margin: 0;
