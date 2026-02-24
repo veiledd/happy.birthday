@@ -15,74 +15,47 @@
       -moz-osx-font-smoothing: grayscale;
       background: #000;
       position: relative;
-      scroll-behavior: smooth;
       font-family: 'UnifrakturCook', cursive;
       color: #ff1a1a;
       text-align: center;
     }
 
     /* =========================
-       MINI GAME (click boxes)
-    ========================== */
-    #game {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: linear-gradient(#000000, #1a0000);
-      z-index: 10;
-      position: fixed;
-      inset: 0;
-    }
-    .game-box {
-      width: 80px;
-      height: 80px;
-      margin: 12px;
-      background: #440000;
-      border: 2px solid #ff1a1a;
-      cursor: pointer;
-      transition: transform 0.2s, background 0.2s;
-    }
-    .game-box:hover {
-      transform: scale(1.2);
-      background: #ff1a1a;
-    }
-
-    /* =========================
-       PAGE BACKGROUND
+       SOFT BACKGROUND + PARTICLES
     ========================== */
     .bg {
       position: fixed;
       inset: 0;
       z-index: 0;
-      background: radial-gradient(circle at center, #6b0000 0%, #450000 35%, #230000 70%, #0b0000 100%);
+      background: radial-gradient(circle at center,
+        #6b0000 0%,
+        #450000 35%,
+        #230000 70%,
+        #0b0000 100%);
       animation: bgBreath 4s ease-in-out infinite;
-      filter: saturate(1.05);
     }
+
     @keyframes bgBreath {
       0%   { filter: brightness(0.9); }
       50%  { filter: brightness(1.08); }
       100% { filter: brightness(0.9); }
     }
 
-    /* =========================
-       FLOATING PARTICLES
-    ========================== */
     .particle {
       position: fixed;
       width: 4px;
       height: 4px;
-      background: #ff2a2a;
       border-radius: 50%;
-      opacity: 0.7;
+      background: rgba(255,50,50,0.7);
       pointer-events: none;
-      z-index: 1;
+      z-index: 0;
       animation: floatUp linear infinite;
     }
+
     @keyframes floatUp {
-      0% { transform: translateY(100vh) scale(0.5); opacity: 0.5; }
-      100% { transform: translateY(-10vh) scale(1); opacity: 1; }
+      0% { transform: translateY(100vh) translateX(0) scale(0.8); opacity: 0; }
+      10% { opacity: 1; }
+      100% { transform: translateY(-20vh) translateX(20px) scale(1); opacity: 0; }
     }
 
     /* =========================
@@ -99,10 +72,10 @@
       opacity: 0.95;
       pointer-events: none;
       filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6));
-      will-change: transform, filter;
       animation: heartBeat 1.25s cubic-bezier(.2,.6,.2,1) infinite;
       transform-origin: center center;
     }
+
     @keyframes heartBeat {
       0%   { transform: translate(-50%, -50%) scale(1); }
       10%  { transform: translate(-50%, -50%) scale(1.06); }
@@ -113,7 +86,11 @@
       80%  { transform: translate(-50%, -50%) scale(1); }
       100% { transform: translate(-50%, -50%) scale(1); }
     }
-    .heart-red { animation: bloodFlow 1.25s linear infinite; }
+
+    .heart-red {
+      animation: bloodFlow 1.25s linear infinite;
+    }
+
     @keyframes bloodFlow {
       0%   { fill: #b00000; }
       30%  { fill: #ff1a1a; }
@@ -122,21 +99,21 @@
     }
 
     /* =========================
-       PAGE CONTENT
+       HEADER
     ========================== */
-    h1, .button, .letter {
-      position: relative;
-      z-index: 2;
-    }
-
     h1 {
       margin: 0;
       padding-top: 8vh;
       font-size: clamp(34px, 6vw, 72px);
       text-shadow: 0 0 28px rgba(255,20,20,0.9);
       line-height: 1;
+      position: relative;
+      z-index: 2;
     }
 
+    /* =========================
+       BUTTON
+    ========================== */
     .button {
       margin-top: 4vh;
       padding: 14px 34px;
@@ -147,10 +124,24 @@
       cursor: pointer;
       transition: transform .12s ease, box-shadow .12s ease;
       backdrop-filter: blur(2px);
+      position: relative;
+      z-index: 2;
     }
-    .button:hover { transform: translateY(-2px); background: #ff2a2a; color: #080808; box-shadow: 0 0 24px rgba(255,20,20,0.7);}
-    .button:active { transform: translateY(0); }
 
+    .button:hover {
+      transform: translateY(-2px);
+      background: #ff2a2a;
+      color: #080808;
+      box-shadow: 0 0 24px rgba(255,20,20,0.7);
+    }
+
+    .button:active {
+      transform: translateY(0);
+    }
+
+    /* =========================
+       LETTER
+    ========================== */
     .letter {
       display: none;
       margin: 36px auto;
@@ -160,17 +151,18 @@
       font-size: 18px;
       font-family: 'IM Fell English', serif;
       color: #fff6e6;
-      background: linear-gradient(180deg, #2a0000 0%, #361212 40%, #1b0000 100%);
-      border: 3px solid #7a0b0b;
+      background: rgba(42,0,0,0.75); /* translucent */
+      border: 3px solid rgba(122,11,11,0.7);
       box-shadow: 0 0 30px rgba(0,0,0,0.6), inset 0 0 30px rgba(120,10,10,0.25);
       transform: rotate(-0.6deg);
-      animation: fadeIn 0.9s ease forwards;
       position: relative;
+      backdrop-filter: blur(4px);
     }
 
-    .letter p { opacity: 0; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: scale(0.98) rotate(-1deg); } to { opacity: 1; transform: scale(1) rotate(-0.6deg); } }
+    .fade-line {
+      opacity: 0;
+      display: block;
+    }
 
     @media (max-width: 600px) {
       h1 { padding-top: 6vh; font-size: 34px; }
@@ -182,11 +174,9 @@
 </head>
 
 <body>
-  <!-- MINI GAME -->
-  <div id="game"></div>
+  <div class="bg" id="bg"></div>
 
-  <!-- Background + heart -->
-  <div class="bg"></div>
+  <!-- SVG Heart -->
   <div class="heart-wrap" aria-hidden="true">
     <svg viewBox="0 0 320 360" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -203,113 +193,97 @@
           </feMerge>
         </filter>
       </defs>
+
       <g transform="translate(20,10)" filter="url(#soft)">
         <path class="heart-red" d="M120 60 C100 20, 40 20, 48 88 C52 120, 88 160, 120 196 C150 160, 184 120, 192 88 C200 20, 140 20, 120 60 Z" fill="url(#g1)" stroke="#3b0000" stroke-width="2"/>
         <path class="heart-red" d="M200 60 C220 20, 280 20, 272 88 C268 120, 232 160, 200 196 C170 160, 136 120, 128 88 C120 20, 180 20, 200 60 Z" fill="url(#g1)" stroke="#3b0000" stroke-width="2" opacity="0.98"/>
         <path d="M120 196 C160 220, 200 228, 200 280 C200 320, 160 340, 120 320 C80 340, 40 320, 40 280 C40 228, 80 220, 120 196 Z" fill="url(#g1)" stroke="#3b0000" stroke-width="2" opacity="0.95"/>
+        <path d="M150 28 C140 0, 170 -10, 180 10 C196 36, 190 48, 170 54" stroke="#5a0000" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.9"/>
+        <path d="M172 22 C190 -8, 220 -6, 228 16" stroke="#6a0000" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.9"/>
       </g>
     </svg>
   </div>
 
-  <!-- CONTENT -->
   <h1>HAPPY BIRTHDAY !!</h1>
-  <button class="button" onclick="toggleLetter()">!! Open Your Letter</button>
 
+  <!-- Mini-game container -->
+  <div id="minigame" style="margin-top:5vh; z-index:2; position:relative;">
+    <p id="memoryText" style="color:#ff7f7f; font-family:'IM Fell English', serif; font-size:20px;">
+      Remember this: <strong>"Chaos and fire dance in the night"</strong>
+    </p>
+    <div id="memoryOptions" style="margin-top:12px;">
+      <button class="button" onclick="checkMemory('Chaos and fire dance in the night')">Chaos and fire dance in the night</button>
+      <button class="button" onclick="checkMemory('Silence flows under the moon')">Silence flows under the moon</button>
+      <button class="button" onclick="checkMemory('Shadows whisper softly')">Shadows whisper softly</button>
+    </div>
+  </div>
+
+  <!-- Letter -->
   <div class="letter" id="birthdayLetter">
-    <h2>To My Forever!</h2>
-    <p>Dear Vlad! I’m 555 and you’re my 666, perfectly chaotic and completely mine. Even from miles away, you cut through the noise like a pair of scissors, sharp and precise, leaving marks that only I can see. Every time I think of you, it feels like a song shaking the world, and somehow, in the middle of all this chaos, I find peace knowing you exist.</p>
-    <p>I keep replaying that night we met in my head!! it was a bit awkward but still really fun!! i loved how interesting you were, and still are. I can still feel the way time warped around us, I hope we get a thousand more nights like that even if it’s through messages or calls where the world fades and it’s just us, pulsing together like a drumbeat too loud to ignore. You are the pulse I follow, the fire I can’t escape, and somehow, I never want to. Even across the distance, you make everything sharper, brighter, and more alive than I ever imagined it could be.</p>
-    <p>I love the little things I notice about <em>you</em>., even from afar: the way your words land, the way your presence lingers in my mind long after we’ve stopped talking, the chaos and calm that seem to follow you like a shadow. You are fire and shadow, scream and silence, and somehow, even through screens and signals, you make me feel seen, understood, and untamed.</p>
-    <p>I can’t promise the world, but I can promise this: my heart is yours, in full, in fragments, and in every space you leave behind. Even when the distance feels impossible. I’ll be here—sharp, steady, and yours. And maybe one day soon, we won’t need screens or messages to reach each other. Until then, I’ll carry you in every thought, every heartbeat, every restless night.</p>
-    <p>—Yours Truly</p>
+    <h2>To My Forever! </h2>
+    <span class="fade-line">Dear Vlad! I’m 555 and you’re my 666, perfectly chaotic and completely mine. Even from miles away, you cut through the noise like a pair of scissors, sharp and precise, leaving marks that only I can see. Every time I think of you, it feels like a song shaking the world, and somehow, in the middle of all this chaos, I find peace knowing you exist.</span>
+    <span class="fade-line">I keep replaying that night we met in my head!! it was a bit awkward but still really fun!! i loved how intresting you were, and still are. I can still feel the way time warped around us, I hope we get a thousand more nights like that even if it’s through messages or calls where the world fades and it’s just us, pulsing together like a drumbeat too loud to ignore. You are the pulse I follow, the fire I can’t escape, and somehow, I never want to. Even across the distance, you make everything sharper, brighter, and more alive than I ever imagined it could be.</span>
+    <span class="fade-line">I love the little things I notice about <em>you</em>., even from afar: the way your words land, the way your presence lingers in my mind long after we’ve stopped talking, the chaos and calm that seem to follow you like a shadow. You are fire and shadow, scream and silence, and somehow, even through screens and signals, you make me feel seen, understood, and untamed.</span>
+    <span class="fade-line">I can’t promise the world, but I can promise this: my heart is yours, in full, in fragments, and in every space you leave behind. Even when the distance feels impossible. I’ll be here—sharp, steady, and yours. And maybe one day soon, we won’t need screens or messages to reach each other. Until then, I’ll carry you in every thought, every heartbeat, every restless night.</span>
+    <span class="fade-line">—Yours Truly</span>
   </div>
 
   <script>
-    /* ----------------
-       MINI GAME
-    ---------------- */
-    const game = document.getElementById("game");
-    const totalBoxes = 12;
-    const unlockedBoxIndex = Math.floor(Math.random() * totalBoxes);
-    for (let i = 0; i < totalBoxes; i++) {
-      const box = document.createElement("div");
-      box.className = "game-box";
-      box.onclick = () => {
-        if (i === unlockedBoxIndex) {
-          game.style.display = "none";
-          startPageEffects();
-        }
-      };
-      game.appendChild(box);
-    }
-
-    /* ----------------
-       PAGE INTERACTIONS
-    ---------------- */
     const letter = document.getElementById("birthdayLetter");
-    const button = document.querySelector(".button");
+    const button = document.createElement("button");
+    const bg = document.getElementById("bg");
     const heartWrap = document.querySelector(".heart-wrap");
 
-    let clickCount = 0;
-
-    function toggleLetter() {
-      clickCount++;
-
-      if (clickCount >= 5) {
-        button.classList.add('panic');
-        setTimeout(()=> button.classList.remove('panic'), 600);
-        alert("STOP!!");
-        clickCount = 0;
-        button.textContent = "!! Open Your Letter";
-        return;
-      }
-
-      if (letter.style.display === "block") {
-        letter.style.display = "none";
-        button.textContent = "!! Open Your Letter";
-        heartWrap.style.animationDuration = "1.25s"; // heart normal speed
+    // =================
+    // Mini-game logic
+    // =================
+    function checkMemory(answer) {
+      if(answer === "Chaos and fire dance in the night") {
+        document.getElementById("minigame").style.display = "none";
+        showLetter();
       } else {
-        letter.style.display = "block";
-        letter.scrollIntoView({behavior:"smooth", block:"center"});
-        fadeInLines(letter);
-        button.textContent = ["!! Open Again?", "!! Really Again?", "!! Again??", "!! Last Time??"][Math.min(clickCount-1,3)];
-        heartWrap.style.animationDuration = "2.5s"; // heart slower while reading
+        alert("Try again!");
       }
     }
 
-    /* ----------------
-       LETTER LINE-BY-LINE FADE
-    ---------------- */
-    function fadeInLines(letter) {
-      const lines = letter.querySelectorAll('p');
-      lines.forEach((line, i) => {
-        line.style.opacity = 0;
-        setTimeout(()=> line.style.opacity = 1, i * 700);
+    // =================
+    // Letter logic
+    // =================
+    function showLetter() {
+      letter.style.display = "block";
+      const lines = letter.querySelectorAll(".fade-line");
+      let delay = 0;
+      lines.forEach(line => {
+        setTimeout(() => {
+          line.style.opacity = 1;
+        }, delay);
+        delay += 900;
       });
+
+      // slow heart while reading
+      heartWrap.style.animationDuration = "2.5s";
     }
 
-    /* ----------------
-       PARTICLES
-    ---------------- */
-    function createParticles(num) {
-      for(let i=0;i<num;i++){
-        const p = document.createElement('div');
-        p.className = 'particle';
-        p.style.left = `${Math.random()*100}vw`;
-        p.style.animationDuration = `${5+Math.random()*7}s`;
-        p.style.width = `${2+Math.random()*3}px`;
-        p.style.height = p.style.width;
-        document.body.appendChild(p);
-      }
+    function speedUpHeartbeat() {
+      heartWrap.style.animationDuration = "0.6s";
+      bg.style.animationDuration = "2.4s";
     }
-    createParticles(30);
 
-    /* ----------------
-       PAGE EFFECTS START AFTER MINI GAME
-    ---------------- */
-    function startPageEffects() {
-      document.querySelector("h1").style.display="block";
-      document.querySelector(".button").style.display="inline-block";
+    function slowHeartbeat() {
+      heartWrap.style.animationDuration = "1.25s";
+      bg.style.animationDuration = "4s";
+    }
+
+    // =================
+    // Particles
+    // =================
+    for(let i=0;i<35;i++){
+      const p = document.createElement("div");
+      p.className = "particle";
+      p.style.left = Math.random()*100+"vw";
+      p.style.animationDuration = (Math.random()*10+5)+"s";
+      p.style.width = p.style.height = (Math.random()*3+2)+"px";
+      document.body.appendChild(p);
     }
   </script>
 
