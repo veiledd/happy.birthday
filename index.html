@@ -1,278 +1,344 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Happy Birthday ♡!!</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Happy Birthday ♡!!</title>
 
-<link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=IM+Fell+English:wght@400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=IM+Fell+English:wght@400&display=swap" rel="stylesheet">
 
-<style>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background: #000;
+      position: relative;
+    }
 
-html, body {
-  height: 100%;
-  margin: 0;
-  overflow-x: hidden;
-  background: linear-gradient(to bottom, #000000 0%, #120000 40%, #1c0000 100%);
-  transition: background 0.6s ease;
-  font-family: 'UnifrakturCook', cursive;
-  color: #ff1a1a;
-  text-align: center;
-}
+    body {
+      font-family: 'UnifrakturCook', cursive;
+      color: #ff1a1a;
+      text-align: center;
+    }
 
-/* ================= PARTICLES ================= */
-.particle {
-  position: fixed;
-  width: 4px;
-  height: 4px;
-  background: rgba(255,40,40,0.6);
-  border-radius: 50%;
-  pointer-events: none;
-  animation: floatUp linear infinite;
-}
+    /* =========================
+       SOFT BACKGROUND GLOW + GRADIENT ON SCROLL
+    ========================== */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: radial-gradient(circle at center,
+        #6b0000 0%,
+        #450000 35%,
+        #230000 70%,
+        #0b0000 100%);
+      animation: bgBreath 4s ease-in-out infinite;
+      filter: saturate(1.05);
+    }
 
-@keyframes floatUp {
-  from { transform: translateY(0); opacity: 0; }
-  20% { opacity: 1; }
-  to { transform: translateY(-120vh); opacity: 0; }
-}
+    @keyframes bgBreath {
+      0%   { filter: brightness(0.9); }
+      50%  { filter: brightness(1.08); }
+      100% { filter: brightness(0.9); }
+    }
 
-/* ================= MINI GAME ================= */
-#miniGame {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  background: #000;
-  transition: opacity 1.2s ease;
-}
+    /* =========================
+       PARTICLES
+    ========================== */
+    .particle {
+      position: fixed;
+      background: rgba(255, 50, 50, 0.3);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      will-change: transform, opacity;
+    }
 
-#miniGame h2 {
-  margin-top: 12vh;
-  color: #ff2a2a;
-}
+    /* =========================
+       HEART SVG
+    ========================== */
+    .heart-wrap {
+      position: fixed;
+      left: 50%;
+      top: 42%;
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      width: min(40vmin, 420px);
+      max-width: 520px;
+      opacity: 0.95;
+      pointer-events: none;
+      filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6));
+      animation: heartBeat 1.25s cubic-bezier(.2,.6,.2,1) infinite;
+      transform-origin: center center;
+    }
 
-/* ================= BACKGROUND GLOW ================= */
-.bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background: radial-gradient(circle at center,
-    #6b0000 0%,
-    #450000 40%,
-    #120000 100%);
-  animation: bgBreath 5s ease-in-out infinite;
-  display: none;
-}
+    @keyframes heartBeat {
+      0%   { transform: translate(-50%, -50%) scale(1); }
+      10%  { transform: translate(-50%, -50%) scale(1.06); }
+      20%  { transform: translate(-50%, -50%) scale(0.97); }
+      30%  { transform: translate(-50%, -50%) scale(1.14); }
+      45%  { transform: translate(-50%, -50%) scale(1); }
+      60%  { transform: translate(-50%, -48%) scale(1.06); }
+      80%  { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
 
-@keyframes bgBreath {
-  0% { filter: brightness(0.85); }
-  50% { filter: brightness(1.1); }
-  100% { filter: brightness(0.85); }
-}
+    .heart-red {
+      animation: bloodFlow 1.25s linear infinite;
+    }
+    @keyframes bloodFlow {
+      0%   { fill: #b00000; }
+      30%  { fill: #ff1a1a; }
+      60%  { fill: #9a0000; }
+      100% { fill: #b00000; }
+    }
 
-/* ================= HEART ================= */
-.heart-wrap {
-  position: fixed;
-  left: 50%;
-  top: 42%;
-  transform: translate(-50%, -50%) scale(0.8);
-  width: min(40vmin, 420px);
-  font-size: 120px;
-  opacity: 0;
-  z-index: 1;
-  pointer-events: none;
-  transition: opacity 1.5s ease, transform 1.5s ease;
-  animation: heartBeat 1.25s cubic-bezier(.2,.6,.2,1) infinite;
-}
+    /* =========================
+       PAGE CONTENT
+    ========================== */
+    h1, .button, .letter {
+      position: relative;
+      z-index: 2;
+    }
 
-@keyframes heartBeat {
-  0%   { transform: translate(-50%, -50%) scale(1); }
-  15%  { transform: translate(-50%, -50%) scale(1.08); }
-  30%  { transform: translate(-50%, -50%) scale(0.96); }
-  45%  { transform: translate(-50%, -50%) scale(1.15); }
-  60%  { transform: translate(-50%, -50%) scale(1); }
-  100% { transform: translate(-50%, -50%) scale(1); }
-}
+    h1 {
+      margin: 0;
+      padding-top: 8vh;
+      font-size: clamp(34px, 6vw, 72px);
+      text-shadow: 0 0 28px rgba(255,20,20,0.9);
+      line-height: 1;
+    }
 
-/* ================= TITLE ================= */
-h1 {
-  display: none;
-  padding-top: 8vh;
-  font-size: clamp(34px, 6vw, 72px);
-  text-shadow: 0 0 28px rgba(255,20,20,0.9);
-  animation: titlePulse 3s ease-in-out infinite;
-  position: relative;
-  z-index: 2;
-}
+    .button {
+      margin-top: 4vh;
+      padding: 14px 34px;
+      font-size: 18px;
+      background: rgba(0,0,0,0.65);
+      color: #ff2a2a;
+      border: 2px solid #ff2a2a;
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease;
+      backdrop-filter: blur(2px);
+    }
 
-@keyframes titlePulse {
-  0% { letter-spacing: 2px; }
-  50% { letter-spacing: 6px; }
-  100% { letter-spacing: 2px; }
-}
+    .button:hover {
+      transform: translateY(-2px);
+      background: #ff2a2a;
+      color: #080808;
+      box-shadow: 0 0 24px rgba(255,20,20,0.7);
+    }
 
-/* ================= BUTTON ================= */
-.button {
-  display: none;
-  margin-top: 4vh;
-  padding: 14px 34px;
-  background: rgba(0,0,0,0.6);
-  color: #ff2a2a;
-  border: 2px solid #ff2a2a;
-  cursor: pointer;
-  transition: 0.3s ease;
-  position: relative;
-  z-index: 2;
-}
+    .button:active {
+      transform: translateY(0);
+    }
 
-.button:hover {
-  background: #ff2a2a;
-  color: #000;
-  box-shadow: 0 0 20px rgba(255,20,20,0.7);
-}
+    /* =========================
+       LETTER
+    ========================== */
+    .letter {
+      display: none;
+      margin: 36px auto;
+      width: min(900px, 86%);
+      padding: 34px;
+      line-height: 1.7;
+      font-size: 18px;
+      font-family: 'IM Fell English', serif;
+      color: #fff6e6;
+      background: linear-gradient(180deg, #2a0000 0%, #361212 40%, #1b0000 100%);
+      border: 3px solid #7a0b0b;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6), inset 0 0 30px rgba(120,10,10,0.25);
+      transform: rotate(-0.6deg);
+      animation: fadeIn 0.9s ease forwards;
+      position: relative;
+    }
 
-/* ================= LETTER ================= */
-.letter {
-  display: none;
-  opacity: 0;
-  margin: 40px auto;
-  width: min(900px, 86%);
-  padding: 30px;
-  line-height: 1.7;
-  font-family: 'IM Fell English', serif;
-  background: linear-gradient(180deg, #2a0000, #1a0000);
-  border: 2px solid #7a0b0b;
-  box-shadow: 0 0 30px rgba(0,0,0,0.6);
-  color: #fff6e6;
-  transition: opacity 0.8s ease;
-  position: relative;
-  z-index: 2;
-}
+    /* =========================
+       LINE-BY-LINE FADE
+    ========================== */
+    .letter p,
+    .letter h2 {
+      opacity: 0;
+      transform: translateY(15px);
+    }
 
-</style>
+    .fade-line {
+      animation: lineFade 0.8s ease forwards;
+    }
+
+    @keyframes lineFade {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.98) rotate(-1deg); }
+      to   { opacity: 1; transform: scale(1) rotate(-0.6deg); }
+    }
+
+    @media (max-width: 600px) {
+      h1 { padding-top: 6vh; font-size: 34px; }
+      .button { padding: 10px 18px; }
+      .letter { padding: 18px; font-size: 16px; width: 94%; transform: rotate(0deg); }
+      .heart-wrap { width: min(60vmin, 320px); top: 46%; }
+    }
+
+  </style>
 </head>
 
 <body>
 
-<div id="miniGame">
-  <h2>Click 3 floating hearts to unlock your letter</h2>
-</div>
+  <div class="bg" id="bg"></div>
 
-<div class="bg" id="bg"></div>
+  <!-- Inline SVG heart -->
+  <div class="heart-wrap" aria-hidden="true">
+    <svg viewBox="0 0 320 360" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#ff3b3b"/>
+          <stop offset="55%" stop-color="#b00000"/>
+          <stop offset="100%" stop-color="#4a0000"/>
+        </linearGradient>
+        <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="6" result="b"/>
+          <feMerge>
+            <feMergeNode in="b"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
 
-<div class="heart-wrap" id="heartWrap">❤️</div>
+      <g transform="translate(20,10)" filter="url(#soft)">
+        <path class="heart-red" d="M120 60 C100 20, 40 20, 48 88 C52 120, 88 160, 120 196 C150 160, 184 120, 192 88 C200 20, 140 20, 120 60 Z"
+              fill="url(#g1)" stroke="#3b0000" stroke-width="2"/>
+        <path class="heart-red" d="M200 60 C220 20, 280 20, 272 88 C268 120, 232 160, 200 196 C170 160, 136 120, 128 88 C120 20, 180 20, 200 60 Z"
+              fill="url(#g1)" stroke="#3b0000" stroke-width="2" opacity="0.98"/>
+        <path d="M120 196 C160 220, 200 228, 200 280 C200 320, 160 340, 120 320 C80 340, 40 320, 40 280 C40 228, 80 220, 120 196 Z"
+              fill="url(#g1)" stroke="#3b0000" stroke-width="2" opacity="0.95"/>
+      </g>
+    </svg>
+  </div>
 
-<h1>HAPPY BIRTHDAY !!</h1>
+  <h1>HAPPY BIRTHDAY !!</h1>
 
-<button class="button" onclick="toggleLetter()">Open Your Letter</button>
+  <button class="button" 
+          onmouseover="speedUpHeartbeat()" 
+          onmouseout="slowHeartbeat()" 
+          onclick="toggleLetter()">
+    !! Open Your Letter
+  </button>
 
-<div class="letter" id="birthdayLetter">
-  <h2>To My Forever,</h2>
+  <div class="letter" id="birthdayLetter">
+    <h2>To My Forever!</h2>
+    <p>Dear Vlad! I’m 555 and you’re my 666, perfectly chaotic and completely mine. Even from miles away, you cut through the noise like a pair of scissors, sharp and precise, leaving marks that only I can see. Every time I think of you, it feels like a song shaking the world, and somehow, in the middle of all this chaos, I find peace knowing you exist.</p>
+    <p>I keep replaying that night we met in my head!! it was a bit awkward but still really fun!! i loved how interesting you were, and still are. I can still feel the way time warped around us, I hope we get a thousand more nights like that even if it’s through messages or calls where the world fades and it’s just us, pulsing together like a drumbeat too loud to ignore. You are the pulse I follow, the fire I can’t escape, and somehow, I never want to. Even across the distance, you make everything sharper, brighter, and more alive than I ever imagined it could be.</p>
+    <p>I love the little things I notice about <em>you</em>., even from afar: the way your words land, the way your presence lingers in my mind long after we’ve stopped talking, the chaos and calm that seem to follow you like a shadow. You are fire and shadow, scream and silence, and somehow, even through screens and signals, you make me feel seen, understood, and untamed.</p>
+    <p>I can’t promise the world, but I can promise this: my heart is yours, in full, in fragments, and in every space you leave behind. Even when the distance feels impossible. I’ll be here—sharp, steady, and yours. And maybe one day soon, we won’t need screens or messages to reach each other. Until then, I’ll carry you in every thought, every heartbeat, every restless night.</p>
+    <p>—Yours Truly</p>
+  </div>
 
-  <p>Dear Vlad,</p>
+  <script>
+    const letter = document.getElementById("birthdayLetter");
+    const button = document.querySelector(".button");
+    const bg = document.getElementById("bg");
+    const heartWrap = document.querySelector(".heart-wrap");
+    let clickCount = 0;
 
-  <p>
-    I’m 555 and you’re my 666 — perfectly chaotic and completely mine. Even from miles away, you cut through the noise like a pair of scissors, sharp and precise, leaving marks that only I can see. Every time I think of you, it feels like something inside me wakes up.
-  </p>
+    function toggleLetter() {
+      clickCount++;
+      if (clickCount >= 5) {
+        button.classList.add('panic');
+        setTimeout(()=> button.classList.remove('panic'), 600);
+        alert("STOP!!");
+        clickCount = 0;
+        button.textContent = "!! Open Your Letter";
+        return;
+      }
 
-  <p>
-    I still replay the night we met. It was awkward. It was strange. It was ours.
-    Time felt softer then, like it bent around us just enough to let something begin. I remember how interesting you were — and I still do. I want a thousand more nights like that. Even if they’re through screens and late calls where the world fades and it’s just us.
-  </p>
+      if (letter.style.display === "block") {
+        // Hide letter and resume normal heartbeat
+        letter.style.opacity = "0";
+        heartWrap.style.animationDuration = "1.25s";
+        setTimeout(()=>{
+          letter.style.display="none";
+          const lines = letter.querySelectorAll("p, h2");
+          lines.forEach(line => {
+            line.classList.remove("fade-line");
+            line.style.opacity = "0";
+            line.style.transform = "translateY(15px)";
+          });
+        },400);
+        button.textContent = "!! Open Your Letter";
+      } else {
+        letter.style.display = "block";
 
-  <p>
-    You feel like a pulse I follow without thinking. Like a fire I don’t want to escape. Even from a distance, you make everything sharper, brighter, more alive.
-  </p>
+        // Slow down heart while reading
+        heartWrap.style.animationDuration = "2s";
 
-  <p>
-    I love the small things about you — the way your words linger, the way your presence stays long after we stop talking. You are fire and shadow, chaos and calm — and somehow, even through screens, you make me feel seen.
-  </p>
+        const lines = letter.querySelectorAll("p, h2");
+        lines.forEach((line,index) => {
+          setTimeout(()=> line.classList.add("fade-line"), index*400);
+        });
 
-  <p>
-    I can’t promise you the world. But I can promise you this —
-    My heart is yours. Fully. In fragments. In every quiet space between conversations.
-  </p>
-
-  <p>
-    I’ll be here. Steady. Sharp. Yours.
-  </p>
-
-  <p>— Yours Truly</p>
-</div>
-
-<script>
-
-const miniGame = document.getElementById('miniGame');
-const bg = document.getElementById('bg');
-const heartWrap = document.getElementById('heartWrap');
-const h1 = document.querySelector('h1');
-const button = document.querySelector('.button');
-const letter = document.getElementById('birthdayLetter');
-
-let heartsClicked = 0;
-const heartsToClick = 3;
-
-for (let i=0;i<5;i++) {
-  const heart = document.createElement('div');
-  heart.innerHTML = "❤️";
-  heart.style.position = "absolute";
-  heart.style.fontSize = `${20+Math.random()*30}px`;
-  heart.style.top = `${Math.random()*80+10}%`;
-  heart.style.left = `${Math.random()*80+10}%`;
-  heart.style.cursor = "pointer";
-  miniGame.appendChild(heart);
-
-  heart.onclick = () => {
-    heart.style.opacity = "0";
-    heartsClicked++;
-    if(heartsClicked >= heartsToClick){
-      unlockPage();
+        letter.scrollIntoView({behavior:"smooth", block:"center"});
+        const messages = ["!! Open Again?", "!! Really Again?", "!! Again??", "!! Last Time??"];
+        button.textContent = messages[Math.min(clickCount-1, messages.length-1)];
+      }
     }
-  }
-}
 
-function unlockPage(){
-  miniGame.style.opacity = "0";
-  setTimeout(() => {
-    miniGame.style.display = "none";
-    bg.style.display = "block";
-    h1.style.display = "block";
-    button.style.display = "inline-block";
-    heartWrap.style.opacity = "1";
-    heartWrap.style.transform = "translate(-50%, -50%) scale(1)";
-  }, 1200);
-}
+    function speedUpHeartbeat() {
+      heartWrap.style.animationDuration = "0.6s";
+      bg.style.animationDuration = "2.4s";
+    }
 
-function toggleLetter(){
-  if(letter.style.display === "block"){
-    letter.style.opacity = "0";
-    setTimeout(()=> letter.style.display="none",400);
-  } else {
-    letter.style.display = "block";
-    setTimeout(()=> letter.style.opacity="1",50);
-  }
-}
+    function slowHeartbeat() {
+      heartWrap.style.animationDuration = "1.25s";
+      bg.style.animationDuration = "4s";
+    }
 
-function createParticle(){
-  const p = document.createElement("div");
-  p.classList.add("particle");
-  p.style.left = Math.random()*100+"vw";
-  p.style.animationDuration = 6 + Math.random()*6 + "s";
-  document.body.appendChild(p);
-  setTimeout(()=>p.remove(),12000);
-}
-setInterval(createParticle, 500);
+    // -------------------------
+    // Floating particles
+    // -------------------------
+    const numParticles = 40;
+    for(let i=0;i<numParticles;i++){
+      const p = document.createElement("div");
+      p.classList.add("particle");
+      const size = Math.random()*6+3;
+      p.style.width = p.style.height = size+"px";
+      p.style.left = Math.random()*100+"%";
+      p.style.top = Math.random()*100+"%";
+      p.style.opacity = Math.random()*0.4 + 0.1;
+      document.body.appendChild(p);
 
-window.addEventListener("scroll", ()=>{
-  const scroll = window.scrollY;
-  const intensity = Math.min(scroll/600,1);
-  document.body.style.background =
-    `linear-gradient(to bottom,
-      rgb(${0+intensity*20},0,0) 0%,
-      rgb(${18+intensity*30},0,0) 40%,
-      rgb(${28+intensity*40},0,0) 100%)`;
-});
+      const speedX = (Math.random()-0.5)*0.3;
+      const speedY = (Math.random()-0.5)*0.3;
+      (function animateParticle(el){
+        let x=0,y=0;
+        function step(){
+          x+=speedX; y+=speedY;
+          el.style.transform = `translate(${x}px, ${y}px)`;
+          requestAnimationFrame(step);
+        }
+        step();
+      })(p);
+    }
 
-</script>
+    // -------------------------
+    // Background gradient on scroll
+    // -------------------------
+    window.addEventListener("scroll", ()=>{
+      const scroll = window.scrollY;
+      bg.style.background = `radial-gradient(circle at center, 
+        #6b0000 ${0+scroll/15}%, 
+        #450000 ${35+scroll/15}%, 
+        #230000 ${70+scroll/15}%, 
+        #0b0000 100%)`;
+    });
+  </script>
 
 </body>
 </html>
