@@ -43,47 +43,37 @@
   }
   @keyframes bgBreath { 0%{filter:brightness(0.9)}50%{filter:brightness(1.08)}100%{filter:brightness(0.9)} }
 
- <!-- heart-wrap simplified to a ♡ character -->
-<div class="heart-wrap" id="heartWrap" aria-hidden="true">
-  <div class="heart-char">♡</div>
-</div>
-  .heart-wrap {
+ <!-- Heart Character Wrapper -->
+<div class="heart-wrap">♡</div>
+
+<style>
+/* Heart wrapper (text-based) */
+.heart-wrap {
   position: fixed;
-  left: 50%; top: 42%;
+  left: 50%;
+  top: 42%;
   transform: translate(-50%, -50%);
+  font-size: 8rem;       /* adjust size */
+  color: #ff1a1a;
+  text-shadow: 0 0 20px #ff1a1a, 0 0 40px #b00000;
   z-index: 0;
-  width: 120px;
-  height: 120px;
-  display: none;
   pointer-events: none;
   animation: heartBeat 1.25s cubic-bezier(.2,.6,.2,1) infinite;
   transform-origin: center center;
 }
 
-.heart-char {
-  font-size: 8rem;
-  color: #ff1a1a;
-  text-shadow: 0 0 24px #ff2a2a, 0 0 48px #b00000;
-  animation: bloodFlow 1.25s linear infinite;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-}
-
-/* LUB-DUB rhythm */
+/* Heartbeat keyframes (lub-dub rhythm) */
 @keyframes heartBeat {
   0%   { transform: translate(-50%, -50%) scale(1); }
-  10%  { transform: translate(-50%, -50%) scale(1.06); }
+  10%  { transform: translate(-50%, -50%) scale(1.06); } /* lub */
   20%  { transform: translate(-50%, -50%) scale(0.97); }
-  30%  { transform: translate(-50%, -50%) scale(1.14); }
+  30%  { transform: translate(-50%, -50%) scale(1.14); } /* dub */
   45%  { transform: translate(-50%, -50%) scale(1); }
-  60%  { transform: translate(-50%, -48%) scale(1.06); }
+  60%  { transform: translate(-50%, -48%) scale(1.06); } /* afterbeat */
   80%  { transform: translate(-50%, -50%) scale(1); }
   100% { transform: translate(-50%, -50%) scale(1); }
 }
-
+</style>
 /* subtle blood color pulse */
 @keyframes bloodFlow {
   0%   { color: #b00000; }
