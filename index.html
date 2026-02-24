@@ -1,313 +1,395 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Happy Birthday ♡!!</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Happy Birthday ♡!!</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=IM+Fell+English:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=IM+Fell+English:wght@400&display=swap" rel="stylesheet">
 
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      background: #000;
-      font-family: 'UnifrakturCook', cursive;
-      color: #ff1a1a;
-      text-align: center;
-    }
+<style>
+  html,body{
+    height:100%; margin:0; background:#000; color:#ff1a1a;
+    font-family:'UnifrakturCook',cursive; text-align:center; overflow-x:hidden;
+  }
 
-    /* =========================
-       BACKGROUND & PARTICLES
-    ========================== */
-    .bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      background: radial-gradient(circle at center,
-        #6b0000 0%,
-        #450000 35%,
-        #230000 70%,
-        #0b0000 100%);
-      animation: bgBreath 4s ease-in-out infinite;
-      filter: saturate(1.05);
-      overflow: hidden;
-    }
+  /* ===== minigame UI ===== */
+  #minigame {
+    position:fixed; inset:0; z-index:30;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:18px; background:linear-gradient(#000,#120000);
+    padding:24px;
+  }
+  #memoryText {
+    color:#ff8b8b; font-family:'IM Fell English',serif; font-size:20px;
+    background: rgba(30,0,0,0.3); padding:12px 18px; border-radius:8px;
+    border:1px solid rgba(255,40,40,0.15);
+    backdrop-filter: blur(4px);
+  }
+  .options {
+    display:flex; gap:12px; flex-wrap:wrap; justify-content:center; max-width:900px;
+  }
+  .opt-btn {
+    background:rgba(0,0,0,0.7); color:#ffbdbd; border:2px solid #7a0b0b;
+    padding:10px 14px; cursor:pointer; font-family:'IM Fell English',serif;
+    transition:transform .12s, background .12s;
+  }
+  .opt-btn:hover{ transform:translateY(-4px); background:#ff2a2a; color:#080808; }
 
-    @keyframes bgBreath {
-      0%,100% { filter: brightness(0.9); }
-      50% { filter: brightness(1.08); }
-    }
+  /* ===== background & heart & particles ===== */
+  .bg {
+    position:fixed; inset:0; z-index:0;
+    background: radial-gradient(circle at center, #6b0000 0%, #450000 35%, #230000 70%, #0b0000 100%);
+    animation:bgBreath 4s ease-in-out infinite; display:none;
+  }
+  @keyframes bgBreath { 0%{filter:brightness(0.9)}50%{filter:brightness(1.08)}100%{filter:brightness(0.9)} }
 
-    /* floating particles */
-    .particle {
-      position: fixed;
-      background: rgba(255,20,20,0.3);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 0;
-      animation: floatParticle linear infinite;
-    }
-    @keyframes floatParticle {
-      0% { transform: translateY(100vh) translateX(0) scale(0.5); opacity:0; }
-      10% { opacity:0.3; }
-      50% { opacity:0.6; }
-      100% { transform: translateY(-50vh) translateX(20vw) scale(1); opacity:0; }
-    }
+ <!-- heart-wrap simplified to a ♡ character -->
+<div class="heart-wrap" id="heartWrap" aria-hidden="true">
+  <div class="heart-char">♡</div>
+</div>
+  .heart-wrap {
+  position: fixed;
+  left: 50%; top: 42%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  width: 120px;
+  height: 120px;
+  display: none;
+  pointer-events: none;
+  animation: heartBeat 1.25s cubic-bezier(.2,.6,.2,1) infinite;
+  transform-origin: center center;
+}
 
-    /* =========================
-       HEART
-    ========================== */
-    .heart-wrap {
-      position:fixed; 
-      left:50%; top:42%; 
-      transform:translate(-50%,-50%);
-      z-index:0; 
-      width:min(40vmin,120px); 
-      max-width:180px; 
-      opacity:0.95;
-      pointer-events:none;
-      animation:heartBeat 1.25s cubic-bezier(.2,.6,.2,1) infinite; 
-      transform-origin:center center;
-      display:none;
-    }
+.heart-char {
+  font-size: 8rem;
+  color: #ff1a1a;
+  text-shadow: 0 0 24px #ff2a2a, 0 0 48px #b00000;
+  animation: bloodFlow 1.25s linear infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
 
-    .heart-char {
-      font-size: 6rem;
-      color: #ff1a1a;
-      text-shadow: 0 0 20px #b00000, 0 0 40px #ff1a1a;
-      animation: bloodFlow 1.25s linear infinite;
-    }
+/* LUB-DUB rhythm */
+@keyframes heartBeat {
+  0%   { transform: translate(-50%, -50%) scale(1); }
+  10%  { transform: translate(-50%, -50%) scale(1.06); }
+  20%  { transform: translate(-50%, -50%) scale(0.97); }
+  30%  { transform: translate(-50%, -50%) scale(1.14); }
+  45%  { transform: translate(-50%, -50%) scale(1); }
+  60%  { transform: translate(-50%, -48%) scale(1.06); }
+  80%  { transform: translate(-50%, -50%) scale(1); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
 
-    @keyframes heartBeat {
-      0% {transform:translate(-50%,-50%) scale(1)}
-      10% {transform:translate(-50%,-50%) scale(1.06)}
-      20% {transform:translate(-50%,-50%) scale(0.97)}
-      30% {transform:translate(-50%,-50%) scale(1.14)}
-      45% {transform:translate(-50%,-50%) scale(1)}
-      60% {transform:translate(-50%,-48%) scale(1.06)}
-      80% {transform:translate(-50%,-50%) scale(1)}
-      100% {transform:translate(-50%,-50%) scale(1)}
-    }
+/* subtle blood color pulse */
+@keyframes bloodFlow {
+  0%   { color: #b00000; }
+  30%  { color: #ff1a1a; }
+  60%  { color: #9a0000; }
+  100% { color: #b00000; }
+}
 
-    @keyframes bloodFlow {
-      0%,100% { color: #b00000; }
-      30% { color: #ff1a1a; }
-      60% { color: #9a0000; }
-    }
+  .particle {
+    position:fixed; width:4px; height:4px; background:rgba(255,50,50,0.7); border-radius:50%;
+    pointer-events:none; z-index:1; opacity:0.6;
+  }
 
-    /* =========================
-       PAGE CONTENT
-    ========================== */
-    h1, .button, .letter {
-      position: relative;
-      z-index: 2;
-    }
+  /* ===== page content ===== */
+  h1{ display:none; margin:0; padding-top:8vh; font-size:clamp(34px,6vw,72px);
+      text-shadow:0 0 28px rgba(255,20,20,0.9); z-index:2; position:relative; }
+  .button{ display:none; margin-top:4vh; padding:14px 34px; font-size:18px;
+    background:rgba(0,0,0,0.65); color:#ff2a2a; border:2px solid #ff2a2a; cursor:pointer;
+    transition:transform .12s, box-shadow .12s; z-index:2; position:relative; }
+  .button:hover{ transform:translateY(-2px); background:#ff2a2a; color:#080808; box-shadow:0 0 24px rgba(255,20,20,0.7);}
 
-    h1 {
-      margin: 0;
-      padding-top: 8vh;
-      font-size: clamp(34px, 6vw, 72px);
-      text-shadow: 0 0 28px rgba(255,20,20,0.9);
-      line-height: 1;
-    }
+  /* translucent letter */
+  .letter{
+    display:none; margin:36px auto; width:min(900px,86%); padding:34px;
+    line-height:1.7; font-size:18px; font-family:'IM Fell English',serif;
+    color:#fff6e6; background:rgba(42,0,0,0.75); border:3px solid rgba(122,11,11,0.7);
+    box-shadow:0 0 30px rgba(0,0,0,0.6), inset 0 0 30px rgba(120,10,10,0.25);
+    transform:rotate(-0.6deg); position:relative; z-index:2; backdrop-filter:blur(4px);
+  }
 
-    .button {
-      margin-top: 4vh;
-      padding: 14px 34px;
-      font-size: 18px;
-      background: rgba(0,0,0,0.65);
-      color: #ff2a2a;
-      border: 2px solid #ff2a2a;
-      cursor: pointer;
-      transition: transform .12s ease, box-shadow .12s ease;
-      backdrop-filter: blur(2px);
-    }
+  .fade-line{ opacity:0; transform:translateY(15px); display:block; transition:opacity .7s ease, transform .7s ease; }
 
-    .button:hover {
-      transform: translateY(-2px);
-      background: #ff2a2a;
-      color: #080808;
-      box-shadow: 0 0 24px rgba(255,20,20,0.7);
-    }
+  @media (max-width:600px){
+    h1{padding-top:6vh;font-size:34px}
+    .letter{transform:rotate(0deg); padding:18px; font-size:16px}
+  }
 
-    .button:active {
-      transform: translateY(0);
-    }
-
-    /* =========================
-       LETTER
-    ========================== */
-    .letter {
-      display: none;
-      margin: 36px auto;
-      width: min(900px, 86%);
-      padding: 34px;
-      line-height: 1.7;
-      font-size: 18px;
-      font-family: 'IM Fell English', serif;
-      color: #fff6e6;
-      background: rgba(42,0,0,0.75); /* translucent */
-      border: 3px solid #7a0b0b;
-      box-shadow: 0 0 30px rgba(0,0,0,0.6), inset 0 0 30px rgba(120,10,10,0.25);
-      transform: rotate(-0.6deg);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .letter p {
-      opacity: 0;
-      margin-bottom: 1em;
-    }
-
-    /* fade-in line by line */
-    @keyframes fadeLine {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* =========================
-       MINIGAME CONTAINER
-    ========================== */
-    #gameContainer {
-      margin-top: 5vh;
-      color: #ffaaaa;
-      z-index:2;
-    }
-    #gameContainer button {
-      margin: 6px;
-      padding: 8px 14px;
-      font-size: 16px;
-      background: rgba(0,0,0,0.65);
-      color: #ff2a2a;
-      border: 2px solid #ff2a2a;
-      cursor: pointer;
-    }
-    #gameContainer button:hover {
-      background: #ff2a2a;
-      color: #080808;
-    }
-
-    @media (max-width: 600px) {
-      h1 { padding-top: 6vh; font-size: 34px; }
-      .button { padding: 10px 18px; }
-      .letter { padding: 18px; font-size: 16px; width: 94%; transform: rotate(0deg); }
-      .heart-wrap { width: min(60vmin, 120px); top: 46%; }
-    }
-  </style>
+  /* progress indicator */
+  #progress { color:#ffb3b3; margin-top:10px; font-family:'IM Fell English',serif; z-index:2; position:relative}
+</style>
 </head>
-
 <body>
 
+  <!-- MINIGAME (sequential memory rounds) -->
+  <div id="minigame">
+    <div id="memoryCard" style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+      <div id="memoryText" style="font-size:20px; color:#ff9b9b; font-family:'IM Fell English',serif">Get ready...</div>
+      <div id="progress">Round 0 / 3</div>
+      <div id="memoryChoices" class="options" aria-hidden="true"></div>
+    </div>
+    <div style="margin-top:18px; color:#ff8b8b; font-size:14px;">You must remember each phrase shown briefly, then pick the exact phrase. One mistake restarts sequence.</div>
+  </div>
+
+  <!-- MAIN PAGE (hidden until minigame success) -->
   <div class="bg" id="bg"></div>
 
   <div class="heart-wrap" id="heartWrap" aria-hidden="true">
-    <div class="heart-char">♡</div>
+    <!-- SVG heart (same as before) -->
+    <svg viewBox="0 0 320 360" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#ff3b3b"/>
+          <stop offset="55%" stop-color="#b00000"/>
+          <stop offset="100%" stop-color="#4a0000"/>
+        </linearGradient>
+        <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="6" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <g transform="translate(20,10)" filter="url(#soft)">
+        <path class="heart-red" d="M120 60 C100 20, 40 20, 48 88 C52 120, 88 160, 120 196 C150 160, 184 120, 192 88 C200 20, 140 20, 120 60 Z" fill="url(#g1)" stroke="#3b0000" stroke-width="2"/>
+        <path class="heart-red" d="M200 60 C220 20, 280 20, 272 88 C268 120, 232 160, 200 196 C170 160, 136 120, 128 88 C120 20, 180 20, 200 60 Z" fill="url(#g1)" stroke="#3b0000" stroke-width="2" opacity="0.98"/>
+        <path d="M120 196 C160 220, 200 228, 200 280 C200 320, 160 340, 120 320 C80 340, 40 320, 40 280 C40 228, 80 220, 120 196 Z" fill="url(#g1)" stroke="#3b0000" stroke-width="2" opacity="0.95"/>
+      </g>
+    </svg>
   </div>
 
-  <h1>HAPPY BIRTHDAY !!</h1>
+  <h1 id="title">HAPPY BIRTHDAY !!</h1>
+  <button class="button" id="openBtn">!! Open Your Letter</button>
 
-  <!-- Minigame -->
-  <div id="gameContainer">
-    <p id="gameQuestion"></p>
-    <div id="gameOptions"></div>
+  <div class="letter" id="birthdayLetter" aria-hidden="true">
+    <h2 class="fade-line">To My Forever,</h2>
+    <span class="fade-line">Dear Vlad! I’m 555 and you’re my 666 — perfectly chaotic and completely mine. Even from miles away, you cut through the noise like a pair of scissors, sharp and precise, leaving marks that only I can see. Every time I think of you, it feels like a song shaking the world, and somehow, in the middle of all this chaos, I find peace knowing you exist.</span>
+    <span class="fade-line">I keep replaying that night we met in my head. It was awkward. It was strange. It was ours. Time felt softer then, like it bent around us just enough to let something begin. I remember how interesting you were — and I still do. I want a thousand more nights like that. Even if they’re through screens and late calls where the world fades and it’s just us.</span>
+    <span class="fade-line">You feel like a pulse I follow without thinking. Like a fire I don’t want to escape. Even from a distance, you make everything sharper, brighter, more alive.</span>
+    <span class="fade-line">I love the small things about you — the way your words linger, the way your presence stays long after we stop talking. You are fire and shadow, chaos and calm — and somehow, even through screens, you make me feel seen.</span>
+    <span class="fade-line">I can’t promise you the world. But I can promise you this — my heart is yours. Fully. In fragments. In every quiet space between conversations.</span>
+    <span class="fade-line">I’ll be here. Steady. Sharp. Yours.</span>
+    <span class="fade-line">— Yours Truly</span>
   </div>
 
-  <!-- Button for letter -->
-  <button class="button" id="letterBtn" style="display:none;">!! Open Your Letter</button>
+<script>
+/* -------------------
+   MEMORY QUIZ (hard mode)
+   - 3 rounds, must get each correct in order
+   - phrase shows briefly (revealTime ms), then choices shown
+   - incorrect answer restarts sequence
+--------------------*/
+const allPhrases = [
+  "Chaos and fire dance in the night",
+  "Silence flows under the moon",
+  "Shadows whisper softly",
+  "We met by the broken clock",
+  "Stars kept one secret",
+  "The clockhands bled at dawn"
+];
 
-  <!-- Letter -->
-  <div class="letter" id="birthdayLetter">
-    <h2>To My Forever!</h2>
-    <p>Dear Vlad! I’m 555 and you’re my 666, perfectly chaotic and completely mine...</p>
-    <p>I keep replaying that night we met in my head!! It was a bit awkward but still really fun...</p>
-    <p>I love the little things I notice about <em>you</em>...</p>
-    <p>I can’t promise the world, but I can promise this: my heart is yours...</p>
-    <p>—Yours Truly</p>
-  </div>
+const rounds = 3;
+const revealTime = 2000; // ms phrase visible
+let sequence = []; // chosen phrases for the run
+let currentRound = 0;
 
-  <script>
-    const bg = document.getElementById("bg");
-    const heartWrap = document.getElementById("heartWrap");
-    const letter = document.getElementById("birthdayLetter");
-    const letterBtn = document.getElementById("letterBtn");
-    const gameContainer = document.getElementById("gameContainer");
-    const gameQuestion = document.getElementById("gameQuestion");
-    const gameOptions = document.getElementById("gameOptions");
+const memoryText = document.getElementById('memoryText');
+const memoryChoices = document.getElementById('memoryChoices');
+const progress = document.getElementById('progress');
+const minigame = document.getElementById('minigame');
 
-    // =========================
-    // PARTICLES
-    // =========================
-    for(let i=0;i<30;i++){
-      const p = document.createElement('div');
-      p.className='particle';
-      p.style.width = p.style.height = Math.random()*6+2+'px';
-      p.style.left = Math.random()*100+'vw';
-      p.style.top = Math.random()*100+'vh';
-      p.style.animationDuration = 10+Math.random()*15+'s';
-      p.style.opacity = Math.random()*0.6;
-      document.body.appendChild(p);
+function pickSequence(){
+  sequence = [];
+  const pool = [...allPhrases];
+  for(let i=0;i<rounds;i++){
+    const idx = Math.floor(Math.random()*pool.length);
+    sequence.push(pool.splice(idx,1)[0]);
+  }
+  currentRound = 0;
+}
+
+function startRound(){
+  progress.textContent = `Round ${currentRound+1} / ${rounds}`;
+  memoryChoices.innerHTML = '';
+  const phrase = sequence[currentRound];
+  memoryText.textContent = `Remember this: "${phrase}"`;
+  // show phrase briefly
+  memoryChoices.setAttribute('aria-hidden','true');
+  setTimeout(()=>{
+    // hide phrase & show choices
+    memoryText.textContent = "Which phrase was that?";
+    showChoices(phrase);
+  }, revealTime);
+}
+
+function showChoices(correct){
+  memoryChoices.innerHTML = '';
+  // build 3 choices: correct + 2 random wrongs
+  const wrongPool = allPhrases.filter(p => p !== correct);
+  shuffleArray(wrongPool);
+  const choices = [correct, wrongPool[0], wrongPool[1]];
+  shuffleArray(choices);
+  memoryChoices.setAttribute('aria-hidden','false');
+  choices.forEach(ch => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.textContent = ch;
+    btn.onclick = ()=> handleChoice(ch);
+    memoryChoices.appendChild(btn);
+  });
+}
+
+function handleChoice(selection){
+  const correct = sequence[currentRound];
+  if(selection === correct){
+    // correct -> next round or unlock
+    currentRound++;
+    if(currentRound >= rounds){
+      // success
+      unlockPage();
+    } else {
+      // small success flash
+      memoryText.textContent = "Correct!";
+      memoryChoices.innerHTML='';
+      setTimeout(()=> startRound(), 800);
     }
+  } else {
+    // wrong -> restart whole sequence (hard mode)
+    memoryText.textContent = "Wrong. Restarting...";
+    memoryChoices.innerHTML='';
+    setTimeout(()=> {
+      pickSequence();
+      startRound();
+    }, 900);
+  }
+}
 
-    // =========================
-    // MINIGAME
-    // =========================
-    const memoryQuestions = [
-      {q:"What number am I?", options:["111","555","666"], answer:"555"},
-      {q:"What color is my favorite?", options:["Red","Blue","Green"], answer:"Red"},
-      {q:"How do I feel about you?", options:["Crazy","Calm","Love"], answer:"Love"},
-      {q:"Which word describes me?", options:["Chaotic","Lazy","Kind"], answer:"Chaotic"},
-    ];
+function unlockPage(){
+  // fade out minigame
+  minigame.style.transition = 'opacity 1s ease';
+  minigame.style.opacity = '0';
+  setTimeout(()=>{ minigame.style.display = 'none'; showMainPage(); }, 1000);
+}
 
-    let currentQ = 0;
+/* -------------------
+   helpers
+--------------------*/
+function shuffleArray(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+}
 
-    function showQuestion(){
-      if(currentQ>=memoryQuestions.length){
-        gameContainer.style.display="none";
-        letterBtn.style.display="inline-block";
-        heartWrap.style.display="block";
-        return;
+/* -------------------
+   show main page + start effects
+--------------------*/
+const bg = document.getElementById('bg');
+const heartWrap = document.getElementById('heartWrap');
+const title = document.getElementById('title');
+const openBtn = document.getElementById('openBtn');
+
+function showMainPage(){
+  bg.style.display='block';
+  heartWrap.style.display='block';
+  title.style.display='block';
+  openBtn.style.display='inline-block';
+  // spawn particles
+  createParticles(36);
+}
+
+/* -------------------
+   particles
+--------------------*/
+function createParticles(n){
+  for(let i=0;i<n;i++){
+    const p = document.createElement('div');
+    p.className='particle';
+    p.style.left = Math.random()*100 + 'vw';
+    p.style.top = Math.random()*100 + 'vh';
+    const s = (Math.random()*4+2)+'px';
+    p.style.width = p.style.height = s;
+    p.style.animationDuration = (6+Math.random()*6)+'s';
+    document.body.appendChild(p);
+    // subtle slow movement
+    const vx = (Math.random()-0.5)*0.3;
+    const vy = (Math.random()-0.5)*0.3 - 0.2;
+    (function loop(el,x=0,y=0){
+      function step(){
+        x += vx; y += vy;
+        el.style.transform = `translate(${x}px, ${y}px)`;
+        requestAnimationFrame(step);
       }
-      const q = memoryQuestions[currentQ];
-      gameQuestion.textContent = q.q;
-      gameOptions.innerHTML="";
-      q.options.forEach(opt=>{
-        const b = document.createElement('button');
-        b.textContent = opt;
-        b.onclick = ()=>checkAnswer(opt);
-        gameOptions.appendChild(b);
-      });
-    }
+      step();
+    })(p);
+  }
+}
 
-    function checkAnswer(opt){
-      const correct = memoryQuestions[currentQ].answer;
-      if(opt===correct){
-        currentQ++;
-        showQuestion();
-      } else {
-        alert("Try again!");
-      }
-    }
+/* -------------------
+   letter + button behavior
+--------------------*/
+const letter = document.getElementById('birthdayLetter');
+let openClicks = 0;
 
-    showQuestion();
-
-    // =========================
-    // LETTER DISPLAY
-    // =========================
-    letterBtn.addEventListener("click",()=>{
-      letter.style.display="block";
-      const ps = letter.querySelectorAll("p");
-      ps.forEach((p,i)=>{
-        p.style.opacity=0;
-        setTimeout(()=>p.style.animation="fadeLine 0.8s forwards",i*600);
-      });
-      // slow heart while reading
-      heartWrap.style.animationDuration="2.5s";
+openBtn.addEventListener('click', ()=> {
+  openClicks++;
+  if(openClicks >= 5){
+    alert("STOP!!");
+    openClicks = 0;
+    openBtn.textContent = "!! Open Your Letter";
+    openBtn.classList.remove('panic');
+    return;
+  }
+  if(letter.style.display === 'block'){
+    // close
+    letter.style.display='none';
+    // resume heart speed
+    heartWrap.style.animationDuration = '1.25s';
+    openBtn.textContent = "!! Open Your Letter";
+    // reset fade-lines
+    const lines = letter.querySelectorAll('.fade-line');
+    lines.forEach(l => { l.style.opacity=0; l.style.transform='translateY(15px)'; });
+  } else {
+    // open - show with line-by-line reveal
+    letter.style.display='block';
+    const lines = letter.querySelectorAll('.fade-line');
+    lines.forEach((l,idx) => {
+      setTimeout(()=>{ l.style.opacity=1; l.style.transform='translateY(0)'; }, idx * 500);
     });
+    // slow heart during reading
+    heartWrap.style.animationDuration = '2.5s';
+    openBtn.textContent = ["!! Open Again?","!! Really Again?","!! Again??","!! Last Time??"][Math.min(openClicks-1,3)];
+  }
+});
 
-  </script>
+/* slight speed change on hover to keep interactivity */
+openBtn.addEventListener('mouseover', ()=> {
+  heartWrap.style.animationDuration = '0.6s';
+  bg.style.animationDuration = '2.4s';
+});
+openBtn.addEventListener('mouseout', ()=> {
+  heartWrap.style.animationDuration = '1.25s';
+  bg.style.animationDuration = '4s';
+});
 
+/* -------------------
+   scroll gradient subtle shift
+--------------------*/
+window.addEventListener('scroll', ()=>{
+  const s = Math.min(window.scrollY/600,1);
+  bg.style.background = `radial-gradient(circle at center, rgb(${107 + s*20},0,0) 0%, rgb(${69 + s*30},0,0) 35%, rgb(${35 + s*30},0,0) 70%, #0b0000 100%)`;
+});
+
+/* -------------------
+   initialize minigame
+--------------------*/
+pickSequence();
+startRound();
+
+</script>
 </body>
 </html>
