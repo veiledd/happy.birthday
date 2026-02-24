@@ -43,44 +43,53 @@
   }
   @keyframes bgBreath { 0%{filter:brightness(0.9)}50%{filter:brightness(1.08)}100%{filter:brightness(0.9)} }
 
- <!-- Heart Character Wrapper -->
-<div class="heart-wrap">♡</div>
+  /* Heart Character Wrapper (text heart) */
+  .heart-wrap {
+    position: fixed;
+    left: 50%;
+    top: 42%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    width: min(40vmin, 180px);
+    max-width: 220px;
+    opacity: 0.95;
+    pointer-events: none;
+    transform-origin: center center;
+    animation: heartBeat 1.25s cubic-bezier(.2,.6,.2,1) infinite;
+    display: none; /* shown after minigame unlock */
+  }
 
-<style>
-/* Heart wrapper (text-based) */
-.heart-wrap {
-  position: fixed;
-  left: 50%;
-  top: 42%;
-  transform: translate(-50%, -50%);
-  font-size: 8rem;       /* adjust size */
-  color: #ff1a1a;
-  text-shadow: 0 0 20px #ff1a1a, 0 0 40px #b00000;
-  z-index: 0;
-  pointer-events: none;
-  animation: heartBeat 1.25s cubic-bezier(.2,.6,.2,1) infinite;
-  transform-origin: center center;
-}
+  .heart-char {
+    font-size: 6rem;
+    color: #ff1a1a;
+    text-shadow: 0 0 20px #b00000, 0 0 40px #ff1a1a;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    height:100%;
+    animation: bloodFlow 1.25s linear infinite;
+  }
 
-/* Heartbeat keyframes (lub-dub rhythm) */
-@keyframes heartBeat {
-  0%   { transform: translate(-50%, -50%) scale(1); }
-  10%  { transform: translate(-50%, -50%) scale(1.06); } /* lub */
-  20%  { transform: translate(-50%, -50%) scale(0.97); }
-  30%  { transform: translate(-50%, -50%) scale(1.14); } /* dub */
-  45%  { transform: translate(-50%, -50%) scale(1); }
-  60%  { transform: translate(-50%, -48%) scale(1.06); } /* afterbeat */
-  80%  { transform: translate(-50%, -50%) scale(1); }
-  100% { transform: translate(-50%, -50%) scale(1); }
-}
-</style>
-/* subtle blood color pulse */
-@keyframes bloodFlow {
-  0%   { color: #b00000; }
-  30%  { color: #ff1a1a; }
-  60%  { color: #9a0000; }
-  100% { color: #b00000; }
-}
+  /* Heartbeat keyframes (lub-dub rhythm) */
+  @keyframes heartBeat {
+    0%   { transform: translate(-50%, -50%) scale(1); }
+    10%  { transform: translate(-50%, -50%) scale(1.06); } /* lub */
+    20%  { transform: translate(-50%, -50%) scale(0.97); }
+    30%  { transform: translate(-50%, -50%) scale(1.14); } /* dub */
+    45%  { transform: translate(-50%, -50%) scale(1); }
+    60%  { transform: translate(-50%, -48%) scale(1.06); } /* afterbeat */
+    80%  { transform: translate(-50%, -50%) scale(1); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+  }
+
+  /* subtle blood color pulse */
+  @keyframes bloodFlow {
+    0%   { color: #b00000; }
+    30%  { color: #ff1a1a; }
+    60%  { color: #9a0000; }
+    100% { color: #b00000; }
+  }
 
   .particle {
     position:fixed; width:4px; height:4px; background:rgba(255,50,50,0.7); border-radius:50%;
@@ -102,6 +111,7 @@
     color:#fff6e6; background:rgba(42,0,0,0.75); border:3px solid rgba(122,11,11,0.7);
     box-shadow:0 0 30px rgba(0,0,0,0.6), inset 0 0 30px rgba(120,10,10,0.25);
     transform:rotate(-0.6deg); position:relative; z-index:2; backdrop-filter:blur(4px);
+    overflow:hidden;
   }
 
   .fade-line{ opacity:0; transform:translateY(15px); display:block; transition:opacity .7s ease, transform .7s ease; }
@@ -109,6 +119,7 @@
   @media (max-width:600px){
     h1{padding-top:6vh;font-size:34px}
     .letter{transform:rotate(0deg); padding:18px; font-size:16px}
+    .heart-char{font-size:4.5rem}
   }
 
   /* progress indicator */
@@ -130,26 +141,9 @@
   <!-- MAIN PAGE (hidden until minigame success) -->
   <div class="bg" id="bg"></div>
 
+  <!-- HEART (text character) -->
   <div class="heart-wrap" id="heartWrap" aria-hidden="true">
-    <!-- SVG heart (same as before) -->
-    <svg viewBox="0 0 320 360" preserveAspectRatio="xMidYMid meet" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stop-color="#ff3b3b"/>
-          <stop offset="55%" stop-color="#b00000"/>
-          <stop offset="100%" stop-color="#4a0000"/>
-        </linearGradient>
-        <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="6" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-      <g transform="translate(20,10)" filter="url(#soft)">
-        <path class="heart-red" d="M120 60 C100 20, 40 20, 48 88 C52 120, 88 160, 120 196 C150 160, 184 120, 192 88 C200 20, 140 20, 120 60 Z" fill="url(#g1)" stroke="#3b0000" stroke-width="2"/>
-        <path class="heart-red" d="M200 60 C220 20, 280 20, 272 88 C268 120, 232 160, 200 196 C170 160, 136 120, 128 88 C120 20, 180 20, 200 60 Z" fill="url(#g1)" stroke="#3b0000" stroke-width="2" opacity="0.98"/>
-        <path d="M120 196 C160 220, 200 228, 200 280 C200 320, 160 340, 120 320 C80 340, 40 320, 40 280 C40 228, 80 220, 120 196 Z" fill="url(#g1)" stroke="#3b0000" stroke-width="2" opacity="0.95"/>
-      </g>
-    </svg>
+    <div class="heart-char">♡</div>
   </div>
 
   <h1 id="title">HAPPY BIRTHDAY !!</h1>
@@ -169,9 +163,6 @@
 <script>
 /* -------------------
    MEMORY QUIZ (hard mode)
-   - 3 rounds, must get each correct in order
-   - phrase shows briefly (revealTime ms), then choices shown
-   - incorrect answer restarts sequence
 --------------------*/
 const allPhrases = [
   "Chaos and fire dance in the night",
@@ -207,10 +198,8 @@ function startRound(){
   memoryChoices.innerHTML = '';
   const phrase = sequence[currentRound];
   memoryText.textContent = `Remember this: "${phrase}"`;
-  // show phrase briefly
   memoryChoices.setAttribute('aria-hidden','true');
   setTimeout(()=>{
-    // hide phrase & show choices
     memoryText.textContent = "Which phrase was that?";
     showChoices(phrase);
   }, revealTime);
@@ -218,7 +207,6 @@ function startRound(){
 
 function showChoices(correct){
   memoryChoices.innerHTML = '';
-  // build 3 choices: correct + 2 random wrongs
   const wrongPool = allPhrases.filter(p => p !== correct);
   shuffleArray(wrongPool);
   const choices = [correct, wrongPool[0], wrongPool[1]];
@@ -236,19 +224,15 @@ function showChoices(correct){
 function handleChoice(selection){
   const correct = sequence[currentRound];
   if(selection === correct){
-    // correct -> next round or unlock
     currentRound++;
     if(currentRound >= rounds){
-      // success
       unlockPage();
     } else {
-      // small success flash
       memoryText.textContent = "Correct!";
       memoryChoices.innerHTML='';
       setTimeout(()=> startRound(), 800);
     }
   } else {
-    // wrong -> restart whole sequence (hard mode)
     memoryText.textContent = "Wrong. Restarting...";
     memoryChoices.innerHTML='';
     setTimeout(()=> {
@@ -259,15 +243,11 @@ function handleChoice(selection){
 }
 
 function unlockPage(){
-  // fade out minigame
   minigame.style.transition = 'opacity 1s ease';
   minigame.style.opacity = '0';
   setTimeout(()=>{ minigame.style.display = 'none'; showMainPage(); }, 1000);
 }
 
-/* -------------------
-   helpers
---------------------*/
 function shuffleArray(a){
   for(let i=a.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
@@ -288,7 +268,6 @@ function showMainPage(){
   heartWrap.style.display='block';
   title.style.display='block';
   openBtn.style.display='inline-block';
-  // spawn particles
   createParticles(36);
 }
 
@@ -305,7 +284,6 @@ function createParticles(n){
     p.style.width = p.style.height = s;
     p.style.animationDuration = (6+Math.random()*6)+'s';
     document.body.appendChild(p);
-    // subtle slow movement
     const vx = (Math.random()-0.5)*0.3;
     const vy = (Math.random()-0.5)*0.3 - 0.2;
     (function loop(el,x=0,y=0){
@@ -335,28 +313,22 @@ openBtn.addEventListener('click', ()=> {
     return;
   }
   if(letter.style.display === 'block'){
-    // close
     letter.style.display='none';
-    // resume heart speed
     heartWrap.style.animationDuration = '1.25s';
     openBtn.textContent = "!! Open Your Letter";
-    // reset fade-lines
     const lines = letter.querySelectorAll('.fade-line');
     lines.forEach(l => { l.style.opacity=0; l.style.transform='translateY(15px)'; });
   } else {
-    // open - show with line-by-line reveal
     letter.style.display='block';
     const lines = letter.querySelectorAll('.fade-line');
     lines.forEach((l,idx) => {
       setTimeout(()=>{ l.style.opacity=1; l.style.transform='translateY(0)'; }, idx * 500);
     });
-    // slow heart during reading
     heartWrap.style.animationDuration = '2.5s';
     openBtn.textContent = ["!! Open Again?","!! Really Again?","!! Again??","!! Last Time??"][Math.min(openClicks-1,3)];
   }
 });
 
-/* slight speed change on hover to keep interactivity */
 openBtn.addEventListener('mouseover', ()=> {
   heartWrap.style.animationDuration = '0.6s';
   bg.style.animationDuration = '2.4s';
@@ -379,7 +351,6 @@ window.addEventListener('scroll', ()=>{
 --------------------*/
 pickSequence();
 startRound();
-
 </script>
 </body>
 </html>
