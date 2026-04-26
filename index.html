@@ -262,37 +262,155 @@ function handle(choice){
   }
 }
 
-/* ================= BOSS ================= */
-const bossContainer=document.getElementById("bossContainer");
-const canvas=document.getElementById("bossCanvas");
-const ctx=canvas.getContext("2d");
+/* ================= BOSS (FULL VERSION) ================= */
 
-let player,boss,game=false;
+const bossContainer = document.getElementById("bossContainer");
+const canvas = document.getElementById("bossCanvas");
+const ctx = canvas.getContext("2d");
 
+let player, boss;
+let bullets = [];
+let enemyBullets = [];
+let keys = {};
+let game = false;
+let gameOver = false;
+
+/* controls */
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+/* start boss */
 function startBoss(){
-  minigame.style.display="none";
-  bossContainer.style.display="flex";
+  minigame.style.display = "none";
+  bossContainer.style.display = "flex";
 
-  player={x:250,y:520,hp:100};
-  boss={x:250,y:100,hp:80};
+  player = { x:250, y:520, hp:100 };
+  boss   = { x:250, y:100, hp:120, dir:1 };
 
-  game=true;
+  bullets = [];
+  enemyBullets = [];
+
+  game = true;
+  gameOver = false;
+
   loop();
 }
 
+/* player attack */
+setInterval(() => {
+  if(game && !gameOver){
+    bullets.push({ x: player.x+5, y: player.y });
+  }
+}, 180);
+
+/* boss attack patterns */
+setInterval(() => {
+  if(!game || gameOver) return;
+
+  // spread shots
+  for(let i=-2;i<=2;i++){
+    enemyBullets.push({
+      x: boss.x,
+      y: boss.y,
+      dx: i * 1.2,
+      dy: 3
+    });
+  }
+
+}, 900);
+
+/* main loop */
 function loop(){
-  if(!game)return;
+  if(!game) return;
 
   ctx.clearRect(0,0,500,600);
 
-  ctx.fillStyle="red";
-  ctx.fillRect(player.x,player.y,10,10);
+  /* ================= PLAYER MOVEMENT ================= */
+  if(keys["ArrowLeft"] || keys["a"]) player.x -= 4;
+  if(keys["ArrowRight"] || keys["d"]) player.x += 4;
+  if(keys["ArrowUp"] || keys["w"]) player.y -= 4;
+  if(keys["ArrowDown"] || keys["s"]) player.y += 4;
 
-  ctx.fillText("♡",boss.x,boss.y);
+  /* clamp */
+  player.x = Math.max(0, Math.min(490, player.x));
+  player.y = Math.max(0, Math.min(590, player.y));
+
+  /* ================= BOSS MOVEMENT ================= */
+  boss.x += boss.dir * 2;
+
+  if(boss.x > 460 || boss.x < 40){
+    boss.dir *= -1;
+  }
+
+  /* ================= DRAW PLAYER ================= */
+  ctx.fillStyle = "#ff3b3b";
+  ctx.fillRect(player.x, player.y, 10, 10);
+
+  /* ================= DRAW BOSS ================= */
+  ctx.font = "30px serif";
+  ctx.fillText("♡", boss.x, boss.y);
+
+  /* ================= PLAYER BULLETS ================= */
+  ctx.fillStyle = "#ffaaaa";
+
+  bullets.forEach((b,i) => {
+    b.y -= 6;
+    ctx.fillRect(b.x, b.y, 3, 6);
+
+    /* hit boss */
+    if(Math.abs(b.x - boss.x) < 20 && Math.abs(b.y - boss.y) < 20){
+      boss.hp -= 2;
+      bullets.splice(i,1);
+    }
+  });
+
+  /* ================= ENEMY BULLETS ================= */
+  ctx.fillStyle = "#ff6666";
+
+  enemyBullets.forEach((b,i) => {
+    b.x += b.dx;
+    b.y += b.dy;
+
+    ctx.fillRect(b.x, b.y, 4, 4);
+
+    /* hit player */
+    if(Math.abs(b.x - player.x) < 10 && Math.abs(b.y - player.y) < 10){
+      player.hp -= 5;
+      enemyBullets.splice(i,1);
+    }
+  });
+
+  /* ================= UI ================= */
+  ctx.fillStyle = "white";
+  ctx.fillText("HP: " + player.hp, 10, 20);
+  ctx.fillText("BOSS: " + boss.hp, 380, 20);
+
+  /* ================= LOSE ================= */
+  if(player.hp <= 0){
+    gameOver = true;
+    game = false;
+    setTimeout(() => {
+      alert("You died...");
+      startBoss(); // restart boss fight (as you wanted)
+    }, 300);
+    return;
+  }
+
+  /* ================= WIN ================= */
+  if(boss.hp <= 0){
+    gameOver = true;
+    game = false;
+
+    setTimeout(() => {
+      alert("You won...");
+      showMainPage(); // back to main letter screen
+    }, 500);
+
+    return;
+  }
 
   requestAnimationFrame(loop);
 }
-
 </script>
 
 </body>
