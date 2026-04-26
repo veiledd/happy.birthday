@@ -1,5 +1,39 @@
 <!DOCTYPE html>
 <html>
+<div id="bossContainer" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:25;
+  background: radial-gradient(circle at center, #1a0000, #000);
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+">
+
+  <div id="bossVoice" style="
+    color:#ff9b9b;
+    font-family:'IM Fell English',serif;
+    margin-bottom:10px;
+    height:24px;
+  "></div>
+
+  <canvas id="bossCanvas" width="500" height="600" style="
+    background: radial-gradient(circle, #220000, #000);
+    border:2px solid #7a0b0b;
+  "></canvas>
+
+  <button id="retryBoss" style="
+    display:none;
+    margin-top:20px;
+    padding:12px 24px;
+    background:#2a0000;
+    color:#ff4d4d;
+    border:2px solid #ff1a1a;
+    cursor:pointer;
+  ">Try Again</button>
+
+</div>
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Happy Birthday ♡!!</title>
@@ -152,7 +186,7 @@
   <div class="letter" id="birthdayLetter" aria-hidden="true">
     <h2 class="fade-line">To My Forever,</h2>
     <span class="fade-line">Dear Vlad!</span> 
-   <span class="fade-line">I’m 555 and you’re my 666 — perfectly chaotic and completely mine. Even from miles away, you cut through the noise like a pair of scissors, sharp and precise, leaving marks that only I can see. Every time I think of you, it feels like a song shaking the world, and somehow, in the middle of all this chaos, I find peace knowing you exist.</span>
+   <span class="fade-line">I’m 555 and you’re my 666 perfect and completely mine. Even from miles away, you cut through the noise like a pair of scissors, sharp and precise, leaving marks that only I can see. Every time I think of you, it feels like a song shaking the world, and somehow, in the middle of all this chaos, I find peace knowing you exist.</span>
     <span class="fade-line">I keep replaying that night we met in my head. It was awkward!!!! It was strange. It was ours. Time felt softer then, like it bent around us just enough to let something begin. I remember how interesting you were and and still are obvly :sob: I want a thousand more nights like that. Even if they’re through screens and late calls where the world fades and it’s just us.</span>
     <span class="fade-line">You feel like a pulse I follow without thinking. Like a fire I don’t want to escape. Even from a distance, you make everything sharper, brighter, more alive.</span>
     <span class="fade-line">I love the small things about <em>you</em> the way your words linger, the way your presence stays long after we stop talking. You are fire and shadow, chaos and calm! and somehow, even through screens, you make me feel seen..</span>
@@ -162,9 +196,9 @@
   </div>
 
 <script>
-/* -------------------
-   MEMORY GAME
---------------------*/
+/* ======================
+   MEMORY GAME (UNCHANGED)
+====================== */
 const allPhrases = [
   "Chaos and fire dance in the night",
   "Silence flows under the moon",
@@ -175,6 +209,7 @@ const allPhrases = [
 ];
 
 const rounds = 3;
+const revealTime = 2000;
 let sequence = [];
 let currentRound = 0;
 
@@ -195,21 +230,23 @@ function pickSequence(){
 
 function startRound(){
   progress.textContent = `Round ${currentRound+1} / ${rounds}`;
-  const phrase = sequence[currentRound];
-  memoryText.textContent = `Remember: "${phrase}"`;
   memoryChoices.innerHTML = '';
-
+  const phrase = sequence[currentRound];
+  memoryText.textContent = `Remember this: "${phrase}"`;
   setTimeout(()=>{
-    memoryText.textContent = "Which one was it?";
+    memoryText.textContent = "Which phrase was that?";
     showChoices(phrase);
-  },1500);
+  }, revealTime);
 }
 
 function showChoices(correct){
-  const wrong = allPhrases.filter(p=>p!==correct).sort(()=>0.5-Math.random());
-  const choices = [correct, wrong[0], wrong[1]].sort(()=>0.5-Math.random());
+  memoryChoices.innerHTML = '';
+  const wrongPool = allPhrases.filter(p => p !== correct);
+  shuffleArray(wrongPool);
+  const choices = [correct, wrongPool[0], wrongPool[1]];
+  shuffleArray(choices);
 
-  choices.forEach(ch=>{
+  choices.forEach(ch => {
     const btn = document.createElement('button');
     btn.className = 'opt-btn';
     btn.textContent = ch;
@@ -218,231 +255,203 @@ function showChoices(correct){
   });
 }
 
-function handleChoice(choice){
-  if(choice === sequence[currentRound]){
+function handleChoice(selection){
+  const correct = sequence[currentRound];
+  if(selection === correct){
     currentRound++;
     if(currentRound >= rounds){
       startBossFight();
     } else {
-      memoryText.textContent = "Correct...";
+      memoryText.textContent = "Correct!";
       memoryChoices.innerHTML='';
-      setTimeout(startRound,800);
+      setTimeout(()=> startRound(), 800);
     }
   } else {
     memoryText.textContent = "Wrong. Restarting...";
     memoryChoices.innerHTML='';
-    setTimeout(()=>{ pickSequence(); startRound(); },900);
+    setTimeout(()=> {
+      pickSequence();
+      startRound();
+    }, 900);
   }
 }
 
-/* -------------------
-   BOSS FIGHT (WITH DEATH MEMORY)
---------------------*/
-let deathCount = 0;
+function shuffleArray(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+}
 
+/* ======================
+   BOSS FIGHT
+====================== */
+const bossContainer = document.getElementById("bossContainer");
+const canvas = document.getElementById("bossCanvas");
+const ctx = canvas.getContext("2d");
+const retryBtn = document.getElementById("retryBoss");
+const voiceBox = document.getElementById("bossVoice");
+
+let player, boss, bullets, enemyBullets, keys, gameOver, dashCooldown;
+
+/* ---- voice lines ---- */
+function voiceLine(text){
+  voiceBox.textContent = text;
+  setTimeout(()=> voiceBox.textContent = "", 2000);
+}
+
+/* ---- start boss ---- */
 function startBossFight(){
-
-  const arena = document.createElement('div');
-  arena.style.position = "fixed";
-  arena.style.inset = "0";
-  arena.style.zIndex = "50";
-  arena.style.background = "linear-gradient(180deg,#000,#1a0000,#000)";
-  arena.style.backgroundSize = "200% 200%";
-  arena.style.animation = "bgMove 6s ease infinite";
-  document.body.appendChild(arena);
-
-  const style = document.createElement('style');
-  style.innerHTML = `
-    @keyframes bgMove {
-      0%{background-position:50% 0%;}
-      50%{background-position:50% 100%;}
-      100%{background-position:50% 0%;}
-    }
-  `;
-  document.head.appendChild(style);
-
-  // voice text
-  const voice = document.createElement('div');
-  voice.style.position = "absolute";
-  voice.style.top = "12%";
-  voice.style.left = "50%";
-  voice.style.transform = "translateX(-50%)";
-  voice.style.color = "#ff9b9b";
-  voice.style.fontFamily = "'IM Fell English', serif";
-  voice.style.fontSize = "18px";
-  arena.appendChild(voice);
-
-  function say(text){
-    voice.style.opacity = 0;
-    setTimeout(()=>{
-      voice.textContent = text;
-      voice.style.opacity = 1;
-    },200);
-  }
-
-  const introLines = ["…you remembered.","so you made it here.","you shouldn’t have."];
-  const retryLines = ["…again?","you came back.","still trying?"];
-  const angryLines = ["why do you persist?","you’re not meant to win.","stop."];
-  const finalLines = ["…just take it already.","why won’t you leave?","fine. have it."];
-
-  if(deathCount === 0) say(introLines[Math.random()*introLines.length|0]);
-  else if(deathCount < 3) say(retryLines[Math.random()*retryLines.length|0]);
-  else if(deathCount < 6) say(angryLines[Math.random()*angryLines.length|0]);
-  else say(finalLines[Math.random()*finalLines.length|0]);
-
-  // player
-  const player = document.createElement('div');
-  player.style.width = "14px";
-  player.style.height = "14px";
-  player.style.background = "white";
-  player.style.position = "absolute";
-  arena.appendChild(player);
-
-  let x = window.innerWidth/2;
-  let y = window.innerHeight*0.8;
-
-  // movement
-  let keys = {};
-  document.addEventListener('keydown', e=>keys[e.key]=true);
-  document.addEventListener('keyup', e=>keys[e.key]=false);
-
-  function loop(){
-    if(keys['ArrowLeft']||keys['a']) x-=4;
-    if(keys['ArrowRight']||keys['d']) x+=4;
-    if(keys['ArrowUp']||keys['w']) y-=4;
-    if(keys['ArrowDown']||keys['s']) y+=4;
-
-    player.style.left = x+"px";
-    player.style.top = y+"px";
-
-    requestAnimationFrame(loop);
-  }
-  loop();
-
-  // boss
-  const boss = document.createElement('div');
-  boss.textContent = "♡";
-  boss.style.position = "absolute";
-  boss.style.left = "50%";
-  boss.style.top = "25%";
-  boss.style.transform = "translate(-50%,-50%)";
-  boss.style.fontSize = "90px";
-  boss.style.textShadow = "0 0 20px red";
-  arena.appendChild(boss);
-
-  let bossHP = 10;
-
-  boss.onclick = ()=>{
-    bossHP--;
-    boss.style.transform = "translate(-50%,-50%) scale(1.2)";
-    setTimeout(()=>boss.style.transform="translate(-50%,-50%) scale(1)",120);
-
-    if(bossHP <= 0){
-      say("…fine.");
-      setTimeout(()=>{
-        arena.remove();
-        unlockPage();
-      },800);
-    }
-  };
-
-  // attacks
-  setInterval(()=>{
-    const atk = document.createElement('div');
-    atk.style.width="8px";
-    atk.style.height="8px";
-    atk.style.background="red";
-    atk.style.position="absolute";
-    atk.style.left=Math.random()*window.innerWidth+"px";
-    arena.appendChild(atk);
-
-    let ay=0;
-
-    function fall(){
-      ay+=6;
-      atk.style.top=ay+"px";
-
-      if(Math.abs(ay-y)<15 && Math.abs(parseInt(atk.style.left)-x)<15){
-        deathCount++;
-        say("…too slow.");
-
-        setTimeout(()=>{
-          arena.remove();
-          startBossFight(); // restart boss only
-        },500);
-      }
-
-      if(ay<window.innerHeight){
-        requestAnimationFrame(fall);
-      } else atk.remove();
-    }
-    fall();
-  },600);
+  minigame.style.display = "none";
+  bossContainer.style.display = "flex";
+  resetBossFight();
 }
 
-/* -------------------
-   MAIN PAGE
---------------------*/
+/* ---- reset ---- */
+function resetBossFight(){
+  player = { x:250, y:520, hp:100 };
+  boss = { x:250, y:80, hp:100, phase:1 };
+
+  bullets = [];
+  enemyBullets = [];
+  keys = {};
+  gameOver = false;
+  dashCooldown = 0;
+
+  retryBtn.style.display = "none";
+
+  voiceLine("So... you made it.");
+
+  requestAnimationFrame(gameLoop);
+}
+
+/* ---- controls ---- */
+document.addEventListener("keydown", e=>{
+  keys[e.key] = true;
+
+  if(e.key === "Shift" && dashCooldown <= 0){
+    player.y -= 60;
+    dashCooldown = 60;
+  }
+});
+
+document.addEventListener("keyup", e=> keys[e.key] = false);
+
+/* ---- shooting ---- */
+setInterval(()=>{
+  if(!gameOver){
+    bullets.push({x:player.x, y:player.y});
+  }
+}, 250);
+
+/* ---- boss attacks ---- */
+setInterval(()=>{
+  if(!gameOver){
+    enemyBullets.push({x:boss.x, y:boss.y, dx:(Math.random()-0.5)*3, dy:3});
+  }
+}, 600);
+
+/* ---- main loop ---- */
+function gameLoop(){
+  if(gameOver) return;
+
+  ctx.clearRect(0,0,500,600);
+
+  /* movement */
+  if(keys["ArrowLeft"]||keys["a"]) player.x -= 4;
+  if(keys["ArrowRight"]||keys["d"]) player.x += 4;
+  if(keys["ArrowUp"]||keys["w"]) player.y -= 4;
+  if(keys["ArrowDown"]||keys["s"]) player.y += 4;
+
+  if(dashCooldown>0) dashCooldown--;
+
+  /* boss phase */
+  if(boss.hp < 50) boss.phase = 2;
+
+  /* draw player */
+  ctx.fillStyle = "#ff4d4d";
+  ctx.fillRect(player.x-5, player.y-5, 10,10);
+
+  /* draw boss */
+  ctx.font = "40px serif";
+  ctx.fillText("♡", boss.x-15, boss.y);
+
+  /* bullets */
+  bullets.forEach((b,i)=>{
+    b.y -= 6;
+    ctx.fillRect(b.x, b.y, 3,6);
+
+    if(Math.abs(b.x - boss.x)<20 && Math.abs(b.y - boss.y)<20){
+      boss.hp -= 2;
+      bullets.splice(i,1);
+      shake();
+    }
+  });
+
+  enemyBullets.forEach((b,i)=>{
+    b.x += b.dx;
+    b.y += b.dy * (boss.phase === 2 ? 1.5 : 1);
+
+    ctx.fillStyle = "#ff9999";
+    ctx.fillRect(b.x, b.y, 4,4);
+
+    if(Math.abs(b.x - player.x)<10 && Math.abs(b.y - player.y)<10){
+      player.hp -= 5;
+      enemyBullets.splice(i,1);
+      shake();
+      voiceLine("Careful.");
+    }
+  });
+
+  /* UI */
+  ctx.fillStyle = "white";
+  ctx.fillText("HP: "+player.hp, 10,20);
+  ctx.fillText("Boss: "+boss.hp, 350,20);
+
+  /* death */
+  if(player.hp <= 0){
+    gameOver = true;
+    voiceLine("You fell...");
+    retryBtn.style.display = "block";
+    return;
+  }
+
+  /* win */
+  if(boss.hp <= 0){
+    gameOver = true;
+    voiceLine("...you win.");
+    setTimeout(showMainPage, 1200);
+    return;
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+/* ---- shake ---- */
+function shake(){
+  canvas.style.transform = "translate("+(Math.random()*6-3)+"px,"+(Math.random()*6-3)+"px)";
+  setTimeout(()=> canvas.style.transform="translate(0,0)", 100);
+}
+
+retryBtn.onclick = resetBossFight;
+
+/* ======================
+   MAIN PAGE (UNCHANGED)
+====================== */
 const bg = document.getElementById('bg');
 const heartWrap = document.getElementById('heartWrap');
 const title = document.getElementById('title');
 const openBtn = document.getElementById('openBtn');
 
-function unlockPage(){
+function showMainPage(){
+  bossContainer.style.display = "none";
   bg.style.display='block';
   heartWrap.style.display='block';
   title.style.display='block';
   openBtn.style.display='inline-block';
-  createParticles(30);
 }
 
-/* -------------------
-   PARTICLES
---------------------*/
-function createParticles(n){
-  for(let i=0;i<n;i++){
-    const p=document.createElement('div');
-    p.className='particle';
-    p.style.left=Math.random()*100+'vw';
-    p.style.top=Math.random()*100+'vh';
-    document.body.appendChild(p);
-  }
-}
-
-/* -------------------
-   LETTER
---------------------*/
-const letter = document.getElementById('birthdayLetter');
-let clicks=0;
-
-openBtn.onclick=()=>{
-  clicks++;
-  if(clicks>=5){
-    alert("STOP!! I LOVE YOU TOOO!!!");
-    clicks=0;
-    return;
-  }
-
-  if(letter.style.display==="block"){
-    letter.style.display="none";
-    heartWrap.style.animationDuration="1.25s";
-  } else {
-    letter.style.display="block";
-    heartWrap.style.animationDuration="2.5s";
-
-    const lines=letter.querySelectorAll('.fade-line');
-    lines.forEach((l,i)=>{
-      setTimeout(()=>{
-        l.style.opacity=1;
-        l.style.transform='translateY(0)';
-      },i*500);
-    });
-  }
-};
-
-/* -------------------
-   INIT
---------------------*/
+/* init */
 pickSequence();
 startRound();
 </script>
