@@ -489,7 +489,38 @@ function showMainPage(){
 
 /* init */
 pickSequence();
-startRound();
+let roundTimeout1 = null;
+let roundTimeout2 = null;
+
+function startRound(){
+
+  // stop old timers (VERY IMPORTANT)
+  clearTimeout(roundTimeout1);
+  clearTimeout(roundTimeout2);
+
+  if(!sequence.length) pickSequence();
+
+  const phrase = sequence[currentRound];
+  if(!phrase) {
+    pickSequence();
+    return startRound();
+  }
+
+  progress.textContent = `Round ${currentRound+1} / ${rounds}`;
+  memoryChoices.innerHTML = '';
+
+  memoryText.textContent = "Get ready...";
+
+  roundTimeout1 = setTimeout(() => {
+    memoryText.textContent = `Remember this: "${phrase}"`;
+
+    roundTimeout2 = setTimeout(() => {
+      memoryText.textContent = "Which phrase was that?";
+      showChoices(phrase);
+    }, revealTime);
+
+  }, 600);
+}
 </script>
 </body>
 </html>
