@@ -262,7 +262,7 @@ function handle(choice){
   }
 }
 
-/* ================= BOSS (FULL VERSION) ================= */
+/* ================= BOSS (FIXED + PARRY + DIALOGUE) ================= */
 
 const bossContainer = document.getElementById("bossContainer");
 const canvas = document.getElementById("bossCanvas");
@@ -274,138 +274,158 @@ let enemyBullets = [];
 let keys = {};
 let game = false;
 let gameOver = false;
+let canParry = true;
 
-/* controls */
-document.addEventListener("keydown", e => keys[e.key] = true);
+/* ===== dialogue system ===== */
+const bossVoice = document.getElementById("bossVoice");
+
+function say(text, time=1800){
+  bossVoice.textContent = text;
+  setTimeout(()=> bossVoice.textContent = "", time);
+}
+
+/* ===== input ===== */
+document.addEventListener("keydown", e => {
+  keys[e.key] = true;
+
+  /* parry */
+  if(e.key === "Shift" && game && !gameOver && canParry){
+    canParry = false;
+
+    // reflect nearby bullets
+    enemyBullets.forEach((b,i)=>{
+      if(Math.abs(b.x - player.x) < 30 && Math.abs(b.y - player.y) < 30){
+        enemyBullets.splice(i,1);
+        bullets.push({x:player.x, y:player.y, ySpeed:-8});
+      }
+    });
+
+    say("Parry.");
+    setTimeout(()=> canParry = true, 500);
+  }
+});
+
 document.addEventListener("keyup", e => keys[e.key] = false);
 
-/* start boss */
+/* ===== START ===== */
 function startBoss(){
   minigame.style.display = "none";
   bossContainer.style.display = "flex";
 
+  resetBoss();
+
+  say("You came back...");
+
+  game = true;
+  loop();
+}
+
+/* ===== RESET (FIX FOR STUCK INPUT BUG) ===== */
+function resetBoss(){
   player = { x:250, y:520, hp:100 };
-  boss   = { x:250, y:100, hp:120, dir:1 };
+  boss   = { x:250, y:100, hp:140, dir:1 };
 
   bullets = [];
   enemyBullets = [];
 
-  game = true;
+  keys = {};            // 🔥 IMPORTANT FIX
   gameOver = false;
-
-  loop();
+  canParry = true;
 }
 
-/* player attack */
-setInterval(() => {
-  if(game && !gameOver){
-    bullets.push({ x: player.x+5, y: player.y });
-  }
-}, 180);
-
-/* boss attack patterns */
-setInterval(() => {
+/* ===== enemy attack ===== */
+setInterval(()=>{
   if(!game || gameOver) return;
 
-  // spread shots
-  for(let i=-2;i<=2;i++){
-    enemyBullets.push({
-      x: boss.x,
-      y: boss.y,
-      dx: i * 1.2,
-      dy: 3
-    });
-  }
+  enemyBullets.push(
+    {x:boss.x, y:boss.y, dx:-2, dy:3},
+    {x:boss.x, y:boss.y, dx: 0, dy:3},
+    {x:boss.x, y:boss.y, dx: 2, dy:3}
+  );
 
-}, 900);
+  if(boss.hp < 70) say("You're still here?");
+  if(boss.hp < 40) say("Why don't you fall?");
+}, 1200);
 
-/* main loop */
+/* ===== loop ===== */
 function loop(){
   if(!game) return;
 
   ctx.clearRect(0,0,500,600);
 
-  /* ================= PLAYER MOVEMENT ================= */
+  /* ===== movement ===== */
   if(keys["ArrowLeft"] || keys["a"]) player.x -= 4;
   if(keys["ArrowRight"] || keys["d"]) player.x += 4;
   if(keys["ArrowUp"] || keys["w"]) player.y -= 4;
   if(keys["ArrowDown"] || keys["s"]) player.y += 4;
 
-  /* clamp */
   player.x = Math.max(0, Math.min(490, player.x));
   player.y = Math.max(0, Math.min(590, player.y));
 
-  /* ================= BOSS MOVEMENT ================= */
+  /* ===== boss movement ===== */
   boss.x += boss.dir * 2;
+  if(boss.x > 460 || boss.x < 40) boss.dir *= -1;
 
-  if(boss.x > 460 || boss.x < 40){
-    boss.dir *= -1;
-  }
-
-  /* ================= DRAW PLAYER ================= */
+  /* ===== draw player ===== */
   ctx.fillStyle = "#ff3b3b";
   ctx.fillRect(player.x, player.y, 10, 10);
 
-  /* ================= DRAW BOSS ================= */
-  ctx.font = "30px serif";
+  /* ===== draw boss ===== */
+  ctx.fillStyle = "#fff";
+  ctx.font = "28px serif";
   ctx.fillText("♡", boss.x, boss.y);
 
-  /* ================= PLAYER BULLETS ================= */
+  /* ===== player bullets ===== */
   ctx.fillStyle = "#ffaaaa";
 
-  bullets.forEach((b,i) => {
-    b.y -= 6;
+  bullets.forEach((b,i)=>{
+    b.y += (b.ySpeed || -6);
     ctx.fillRect(b.x, b.y, 3, 6);
 
-    /* hit boss */
     if(Math.abs(b.x - boss.x) < 20 && Math.abs(b.y - boss.y) < 20){
       boss.hp -= 2;
       bullets.splice(i,1);
     }
   });
 
-  /* ================= ENEMY BULLETS ================= */
+  /* ===== enemy bullets ===== */
   ctx.fillStyle = "#ff6666";
 
-  enemyBullets.forEach((b,i) => {
+  enemyBullets.forEach((b,i)=>{
     b.x += b.dx;
     b.y += b.dy;
 
     ctx.fillRect(b.x, b.y, 4, 4);
 
-    /* hit player */
     if(Math.abs(b.x - player.x) < 10 && Math.abs(b.y - player.y) < 10){
       player.hp -= 5;
       enemyBullets.splice(i,1);
+      say("Careful.");
     }
   });
 
-  /* ================= UI ================= */
+  /* ===== UI ===== */
   ctx.fillStyle = "white";
   ctx.fillText("HP: " + player.hp, 10, 20);
-  ctx.fillText("BOSS: " + boss.hp, 380, 20);
+  ctx.fillText("BOSS: " + boss.hp, 360, 20);
 
-  /* ================= LOSE ================= */
+  /* ===== death ===== */
   if(player.hp <= 0){
-    gameOver = true;
     game = false;
-    setTimeout(() => {
-      alert("You died...");
-      startBoss(); // restart boss fight (as you wanted)
-    }, 300);
+    say("You broke.");
+    setTimeout(()=>{
+      startBoss(); // full reset FIX
+    }, 800);
     return;
   }
 
-  /* ================= WIN ================= */
+  /* ===== win ===== */
   if(boss.hp <= 0){
-    gameOver = true;
     game = false;
-
-    setTimeout(() => {
-      alert("You won...");
-      showMainPage(); // back to main letter screen
-    }, 500);
-
+    say("...silence.");
+    setTimeout(()=>{
+      showMainPage();
+    }, 1000);
     return;
   }
 
