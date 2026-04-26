@@ -262,50 +262,69 @@ function handle(choice){
   }
 }
 
-/* ================= BOSS (FIXED + PARRY + DIALOGUE) ================= */
+/* ================= BOSS (STABLE + ATTACK + PARRY) ================= */
 
 const bossContainer = document.getElementById("bossContainer");
 const canvas = document.getElementById("bossCanvas");
 const ctx = canvas.getContext("2d");
 
 let player, boss;
-let bullets = [];
+let playerBullets = [];
 let enemyBullets = [];
+
 let keys = {};
 let game = false;
 let gameOver = false;
 let canParry = true;
+let loopId = null;
 
-/* ===== dialogue system ===== */
+/* ===== dialogue ===== */
 const bossVoice = document.getElementById("bossVoice");
-
-function say(text, time=1800){
-  bossVoice.textContent = text;
+function say(t, time=1500){
+  bossVoice.textContent = t;
   setTimeout(()=> bossVoice.textContent = "", time);
 }
 
-/* ===== input ===== */
-document.addEventListener("keydown", e => {
+/* ===== INPUT (FIXED SAFE STATE) ===== */
+document.addEventListener("keydown", (e) => {
   keys[e.key] = true;
 
-  /* parry */
-  if(e.key === "Shift" && game && !gameOver && canParry){
+  if(!game || gameOver) return;
+
+  /* PARRY */
+  if(e.key === "Shift" && canParry){
     canParry = false;
 
-    // reflect nearby bullets
-    enemyBullets.forEach((b,i)=>{
-      if(Math.abs(b.x - player.x) < 30 && Math.abs(b.y - player.y) < 30){
-        enemyBullets.splice(i,1);
-        bullets.push({x:player.x, y:player.y, ySpeed:-8});
+    enemyBullets = enemyBullets.filter(b => {
+      const hit =
+        Math.abs(b.x - player.x) < 35 &&
+        Math.abs(b.y - player.y) < 35;
+
+      if(hit){
+        playerBullets.push({x: player.x, y: player.y, dx: 0, dy: -8});
+        return false;
       }
+      return true;
     });
 
-    say("Parry.");
-    setTimeout(()=> canParry = true, 500);
+    say("Parry");
+    setTimeout(()=> canParry = true, 450);
+  }
+
+  /* ATTACK */
+  if(e.key === " "){ // SPACE
+    playerBullets.push({
+      x: player.x,
+      y: player.y,
+      dx: 0,
+      dy: -7
+    });
   }
 });
 
-document.addEventListener("keyup", e => keys[e.key] = false);
+document.addEventListener("keyup", (e) => {
+  keys[e.key] = false;
+});
 
 /* ===== START ===== */
 function startBoss(){
@@ -314,46 +333,45 @@ function startBoss(){
 
   resetBoss();
 
-  say("You came back...");
-
   game = true;
+  say("...again.");
+
+  if(loopId) cancelAnimationFrame(loopId);
   loop();
 }
 
-/* ===== RESET (FIX FOR STUCK INPUT BUG) ===== */
+/* ===== FULL RESET (FIXES MOVEMENT BUG) ===== */
 function resetBoss(){
   player = { x:250, y:520, hp:100 };
   boss   = { x:250, y:100, hp:140, dir:1 };
 
-  bullets = [];
+  playerBullets = [];
   enemyBullets = [];
 
-  keys = {};            // 🔥 IMPORTANT FIX
+  keys = {};           // 🔥 IMPORTANT FIX
   gameOver = false;
   canParry = true;
 }
 
-/* ===== enemy attack ===== */
-setInterval(()=>{
+/* ===== ENEMY ATTACK ===== */
+setInterval(() => {
   if(!game || gameOver) return;
 
   enemyBullets.push(
-    {x:boss.x, y:boss.y, dx:-2, dy:3},
-    {x:boss.x, y:boss.y, dx: 0, dy:3},
-    {x:boss.x, y:boss.y, dx: 2, dy:3}
+    {x: boss.x, y: boss.y, dx: -2, dy: 3},
+    {x: boss.x, y: boss.y, dx:  0, dy: 3},
+    {x: boss.x, y: boss.y, dx:  2, dy: 3}
   );
 
-  if(boss.hp < 70) say("You're still here?");
-  if(boss.hp < 40) say("Why don't you fall?");
-}, 1200);
+}, 900);
 
-/* ===== loop ===== */
+/* ===== LOOP ===== */
 function loop(){
   if(!game) return;
 
   ctx.clearRect(0,0,500,600);
 
-  /* ===== movement ===== */
+  /* ===== MOVEMENT (FIXED SMOOTH) ===== */
   if(keys["ArrowLeft"] || keys["a"]) player.x -= 4;
   if(keys["ArrowRight"] || keys["d"]) player.x += 4;
   if(keys["ArrowUp"] || keys["w"]) player.y -= 4;
@@ -362,33 +380,33 @@ function loop(){
   player.x = Math.max(0, Math.min(490, player.x));
   player.y = Math.max(0, Math.min(590, player.y));
 
-  /* ===== boss movement ===== */
+  /* ===== BOSS MOVE ===== */
   boss.x += boss.dir * 2;
   if(boss.x > 460 || boss.x < 40) boss.dir *= -1;
 
-  /* ===== draw player ===== */
+  /* ===== DRAW PLAYER ===== */
   ctx.fillStyle = "#ff3b3b";
   ctx.fillRect(player.x, player.y, 10, 10);
 
-  /* ===== draw boss ===== */
+  /* ===== DRAW BOSS ===== */
   ctx.fillStyle = "#fff";
   ctx.font = "28px serif";
   ctx.fillText("♡", boss.x, boss.y);
 
-  /* ===== player bullets ===== */
+  /* ===== PLAYER BULLETS ===== */
   ctx.fillStyle = "#ffaaaa";
 
-  bullets.forEach((b,i)=>{
-    b.y += (b.ySpeed || -6);
+  playerBullets.forEach((b,i)=>{
+    b.y += b.dy;
     ctx.fillRect(b.x, b.y, 3, 6);
 
     if(Math.abs(b.x - boss.x) < 20 && Math.abs(b.y - boss.y) < 20){
-      boss.hp -= 2;
-      bullets.splice(i,1);
+      boss.hp -= 3;
+      playerBullets.splice(i,1);
     }
   });
 
-  /* ===== enemy bullets ===== */
+  /* ===== ENEMY BULLETS ===== */
   ctx.fillStyle = "#ff6666";
 
   enemyBullets.forEach((b,i)=>{
@@ -398,7 +416,7 @@ function loop(){
     ctx.fillRect(b.x, b.y, 4, 4);
 
     if(Math.abs(b.x - player.x) < 10 && Math.abs(b.y - player.y) < 10){
-      player.hp -= 5;
+      player.hp -= 6;
       enemyBullets.splice(i,1);
       say("Careful.");
     }
@@ -407,29 +425,25 @@ function loop(){
   /* ===== UI ===== */
   ctx.fillStyle = "white";
   ctx.fillText("HP: " + player.hp, 10, 20);
-  ctx.fillText("BOSS: " + boss.hp, 360, 20);
+  ctx.fillText("BOSS: " + boss.hp, 350, 20);
 
-  /* ===== death ===== */
+  /* ===== DEATH ===== */
   if(player.hp <= 0){
     game = false;
-    say("You broke.");
-    setTimeout(()=>{
-      startBoss(); // full reset FIX
-    }, 800);
+    say("...broken.");
+    setTimeout(()=> startBoss(), 900);
     return;
   }
 
-  /* ===== win ===== */
+  /* ===== WIN ===== */
   if(boss.hp <= 0){
     game = false;
-    say("...silence.");
-    setTimeout(()=>{
-      showMainPage();
-    }, 1000);
+    say("silence.");
+    setTimeout(()=> showMainPage(), 1200);
     return;
   }
 
-  requestAnimationFrame(loop);
+  loopId = requestAnimationFrame(loop);
 }
 </script>
 
