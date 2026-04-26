@@ -163,7 +163,7 @@ cd<!DOCTYPE html>
 
 <script>
 /* -------------------
-   MEMORY QUIZ (hard mode)
+   MEMORY QUIZ
 --------------------*/
 const allPhrases = [
   "Chaos and fire dance in the night",
@@ -175,8 +175,7 @@ const allPhrases = [
 ];
 
 const rounds = 3;
-const revealTime = 2000; // ms phrase visible
-let sequence = []; // chosen phrases for the run
+let sequence = [];
 let currentRound = 0;
 
 const memoryText = document.getElementById('memoryText');
@@ -196,24 +195,21 @@ function pickSequence(){
 
 function startRound(){
   progress.textContent = `Round ${currentRound+1} / ${rounds}`;
-  memoryChoices.innerHTML = '';
   const phrase = sequence[currentRound];
-  memoryText.textContent = `Remember this: "${phrase}"`;
-  memoryChoices.setAttribute('aria-hidden','true');
+  memoryText.textContent = `Remember: "${phrase}"`;
+  memoryChoices.innerHTML = '';
+
   setTimeout(()=>{
-    memoryText.textContent = "Which phrase was that?";
+    memoryText.textContent = "Which one was it?";
     showChoices(phrase);
-  }, revealTime);
+  },1500);
 }
 
 function showChoices(correct){
-  memoryChoices.innerHTML = '';
-  const wrongPool = allPhrases.filter(p => p !== correct);
-  shuffleArray(wrongPool);
-  const choices = [correct, wrongPool[0], wrongPool[1]];
-  shuffleArray(choices);
-  memoryChoices.setAttribute('aria-hidden','false');
-  choices.forEach(ch => {
+  const wrong = allPhrases.filter(p=>p!==correct).sort(()=>0.5-Math.random());
+  const choices = [correct, wrong[0], wrong[1]].sort(()=>0.5-Math.random());
+
+  choices.forEach(ch=>{
     const btn = document.createElement('button');
     btn.className = 'opt-btn';
     btn.textContent = ch;
@@ -222,49 +218,133 @@ function showChoices(correct){
   });
 }
 
-function handleChoice(selection){
-  const correct = sequence[currentRound];
-  if(selection === correct){
+function handleChoice(choice){
+  if(choice === sequence[currentRound]){
     currentRound++;
     if(currentRound >= rounds){
-      unlockPage();
+      startBossFight();
     } else {
-      memoryText.textContent = "Correct!";
+      memoryText.textContent = "Correct...";
       memoryChoices.innerHTML='';
-      setTimeout(()=> startRound(), 800);
+      setTimeout(startRound,800);
     }
   } else {
     memoryText.textContent = "Wrong. Restarting...";
     memoryChoices.innerHTML='';
-    setTimeout(()=> {
-      pickSequence();
-      startRound();
-    }, 900);
-  }
-}
-
-function unlockPage(){
-  minigame.style.transition = 'opacity 1s ease';
-  minigame.style.opacity = '0';
-  setTimeout(()=>{ minigame.style.display = 'none'; showMainPage(); }, 1000);
-}
-
-function shuffleArray(a){
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
+    setTimeout(()=>{ pickSequence(); startRound(); },900);
   }
 }
 
 /* -------------------
-   show main page + start effects
+   BOSS FIGHT
+--------------------*/
+function startBossFight(){
+  memoryText.textContent = "Something appears...";
+  memoryChoices.innerHTML='';
+
+  const arena = document.createElement('div');
+  arena.id = "bossArena";
+  arena.style.position = "fixed";
+  arena.style.inset = "0";
+  arena.style.background = "black";
+  arena.style.zIndex = "40";
+  document.body.appendChild(arena);
+
+  // player
+  const player = document.createElement('div');
+  player.style.width = "20px";
+  player.style.height = "20px";
+  player.style.background = "white";
+  player.style.position = "absolute";
+  player.style.left = "50%";
+  player.style.top = "80%";
+  arena.appendChild(player);
+
+  // boss
+  const boss = document.createElement('div');
+  boss.textContent = "♡";
+  boss.style.position = "absolute";
+  boss.style.fontSize = "80px";
+  boss.style.left = "50%";
+  boss.style.top = "20%";
+  boss.style.transform = "translate(-50%, -50%)";
+  boss.style.cursor = "pointer";
+  arena.appendChild(boss);
+
+  let bossHP = 10;
+
+  boss.onclick = ()=>{
+    bossHP--;
+    boss.style.transform = `translate(-50%, -50%) scale(${1 + Math.random()*0.2})`;
+
+    if(bossHP <= 0){
+      arena.remove();
+      unlockPage();
+    }
+  };
+
+  // movement
+  let keys = {};
+  document.addEventListener('keydown', e=> keys[e.key]=true);
+  document.addEventListener('keyup', e=> keys[e.key]=false);
+
+  let x = window.innerWidth/2;
+  let y = window.innerHeight*0.8;
+
+  function loop(){
+    if(keys['ArrowLeft']||keys['a']) x-=4;
+    if(keys['ArrowRight']||keys['d']) x+=4;
+    if(keys['ArrowUp']||keys['w']) y-=4;
+    if(keys['ArrowDown']||keys['s']) y+=4;
+
+    player.style.left = x+"px";
+    player.style.top = y+"px";
+
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  // falling attacks
+  setInterval(()=>{
+    const atk = document.createElement('div');
+    atk.style.width="10px";
+    atk.style.height="10px";
+    atk.style.background="red";
+    atk.style.position="absolute";
+    atk.style.left = Math.random()*window.innerWidth + "px";
+    atk.style.top = "0px";
+    arena.appendChild(atk);
+
+    let ay = 0;
+    function fall(){
+      ay+=5;
+      atk.style.top = ay+"px";
+
+      // collision
+      if(Math.abs(ay-y)<15 && Math.abs(parseInt(atk.style.left)-x)<15){
+        arena.remove();
+        pickSequence();
+        startRound();
+      }
+
+      if(ay < window.innerHeight){
+        requestAnimationFrame(fall);
+      } else atk.remove();
+    }
+    fall();
+  },700);
+}
+
+/* -------------------
+   UNLOCK MAIN PAGE
 --------------------*/
 const bg = document.getElementById('bg');
 const heartWrap = document.getElementById('heartWrap');
 const title = document.getElementById('title');
 const openBtn = document.getElementById('openBtn');
 
-function showMainPage(){
+function unlockPage(){
+  minigame.style.display='none';
   bg.style.display='block';
   heartWrap.style.display='block';
   title.style.display='block';
@@ -273,82 +353,51 @@ function showMainPage(){
 }
 
 /* -------------------
-   particles
+   PARTICLES
 --------------------*/
 function createParticles(n){
   for(let i=0;i<n;i++){
-    const p = document.createElement('div');
+    const p=document.createElement('div');
     p.className='particle';
-    p.style.left = Math.random()*100 + 'vw';
-    p.style.top = Math.random()*100 + 'vh';
-    const s = (Math.random()*4+2)+'px';
-    p.style.width = p.style.height = s;
-    p.style.animationDuration = (6+Math.random()*6)+'s';
+    p.style.left=Math.random()*100+'vw';
+    p.style.top=Math.random()*100+'vh';
     document.body.appendChild(p);
-    const vx = (Math.random()-0.5)*0.3;
-    const vy = (Math.random()-0.5)*0.3 - 0.2;
-    (function loop(el,x=0,y=0){
-      function step(){
-        x += vx; y += vy;
-        el.style.transform = `translate(${x}px, ${y}px)`;
-        requestAnimationFrame(step);
-      }
-      step();
-    })(p);
   }
 }
 
 /* -------------------
-   letter + button behavior
+   LETTER
 --------------------*/
 const letter = document.getElementById('birthdayLetter');
-let openClicks = 0;
+let clicks=0;
 
-openBtn.addEventListener('click', ()=> {
-  openClicks++;
-  if(openClicks >= 5){
+openBtn.onclick=()=>{
+  clicks++;
+  if(clicks>=5){
     alert("STOP!! I LOVE YOU TOOO!!!");
-    openClicks = 0;
-    openBtn.textContent = "!! Open Your Letter";
-    openBtn.classList.remove('panic');
+    clicks=0;
     return;
   }
-  if(letter.style.display === 'block'){
-    letter.style.display='none';
-    heartWrap.style.animationDuration = '1.25s';
-    openBtn.textContent = "!! Open Your Letter";
-    const lines = letter.querySelectorAll('.fade-line');
-    lines.forEach(l => { l.style.opacity=0; l.style.transform='translateY(15px)'; });
+
+  if(letter.style.display==="block"){
+    letter.style.display="none";
+    heartWrap.style.animationDuration="1.25s";
   } else {
-    letter.style.display='block';
-    const lines = letter.querySelectorAll('.fade-line');
-    lines.forEach((l,idx) => {
-      setTimeout(()=>{ l.style.opacity=1; l.style.transform='translateY(0)'; }, idx * 500);
+    letter.style.display="block";
+    heartWrap.style.animationDuration="2.5s";
+
+    const lines=letter.querySelectorAll('.fade-line');
+    lines.forEach((l,i)=>{
+      setTimeout(()=>{
+        l.style.opacity=1;
+        l.style.transform='translateY(0)';
+      },i*500);
     });
-    heartWrap.style.animationDuration = '2.5s';
-    openBtn.textContent = ["!! Open Again?","!! Really Again?","!! Again??","!! Last Time??"][Math.min(openClicks-1,3)];
   }
-});
-
-openBtn.addEventListener('mouseover', ()=> {
-  heartWrap.style.animationDuration = '0.6s';
-  bg.style.animationDuration = '2.4s';
-});
-openBtn.addEventListener('mouseout', ()=> {
-  heartWrap.style.animationDuration = '1.25s';
-  bg.style.animationDuration = '4s';
-});
+};
 
 /* -------------------
-   scroll gradient subtle shift
---------------------*/
-window.addEventListener('scroll', ()=>{
-  const s = Math.min(window.scrollY/600,1);
-  bg.style.background = `radial-gradient(circle at center, rgb(${107 + s*20},0,0) 0%, rgb(${69 + s*30},0,0) 35%, rgb(${35 + s*30},0,0) 70%, #0b0000 100%)`;
-});
-
-/* -------------------
-   initialize minigame
+   INIT
 --------------------*/
 pickSequence();
 startRound();
