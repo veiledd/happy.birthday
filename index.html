@@ -409,12 +409,17 @@ function gameLoop(){
   ctx.fillText("Boss: "+boss.hp, 350,20);
 
   /* death */
-  if(player.hp <= 0){
-    gameOver = true;
-    voiceLine("You fell...");
-    retryBtn.style.display = "block";
-    return;
-  }
+ if (player.hp <= 0) {
+  gameOver = true;
+
+  // Show message
+  voiceLine("You fell... try again.");
+
+  // Show retry button
+  retryBtn.style.display = "inline-block";
+
+  return; // STOP the loop
+}
 
   /* win */
   if(boss.hp <= 0){
