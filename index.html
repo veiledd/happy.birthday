@@ -19,30 +19,7 @@ html,body{
 .stage { position:fixed; inset:0; display:none; }
 .active { display:block; }
 
-/* =========================
-   MEMORY GAME
-========================= */
-#minigame{
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  background:linear-gradient(#000,#120000);
-  gap:18px;
-}
-
-#memoryText{
-  font-family:'IM Fell English',serif;
-  color:#ff9b9b;
-  background:rgba(40,0,0,0.3);
-  padding:12px 16px;
-  border-radius:10px;
-}
-
-.opt-btn{
-  background:#000; color:#ffb3b3;
-  border:2px solid #7a0b0b;
-  padding:10px 14px;
-  cursor:pointer;
-}
+<script> /* ------------------- MEMORY QUIZ (hard mode) --------------------*/ const allPhrases = [ "Chaos and fire dance in the night", "Silence flows under the moon", "Shadows whisper softly", "We met by the broken clock", "Stars kept one secret", "The clockhands bled at dawn" ]; const rounds = 3; const revealTime = 2000; // ms phrase visible let sequence = []; // chosen phrases for the run let currentRound = 0; const memoryText = document.getElementById('memoryText'); const memoryChoices = document.getElementById('memoryChoices'); const progress = document.getElementById('progress'); const minigame = document.getElementById('minigame'); function pickSequence(){ sequence = []; const pool = [...allPhrases]; for(let i=0;i<rounds;i++){ const idx = Math.floor(Math.random()*pool.length); sequence.push(pool.splice(idx,1)[0]); } currentRound = 0; } function startRound(){ progress.textContent = Round ${currentRound+1} / ${rounds}; memoryChoices.innerHTML = ''; const phrase = sequence[currentRound]; memoryText.textContent = Remember this: "${phrase}"; memoryChoices.setAttribute('aria-hidden','true'); setTimeout(()=>{ memoryText.textContent = "Which phrase was that?"; showChoices(phrase); }, revealTime); } function showChoices(correct){ memoryChoices.innerHTML = ''; const wrongPool = allPhrases.filter(p => p !== correct); shuffleArray(wrongPool); const choices = [correct, wrongPool[0], wrongPool[1]]; shuffleArray(choices); memoryChoices.setAttribute('aria-hidden','false'); choices.forEach(ch => { const btn = document.createElement('button'); btn.className = 'opt-btn'; btn.textContent = ch; btn.onclick = ()=> handleChoice(ch); memoryChoices.appendChild(btn); }); } function handleChoice(selection){ const correct = sequence[currentRound]; if(selection === correct){ currentRound++; if(currentRound >= rounds){ unlockPage(); } else { memoryText.textContent = "Correct!"; memoryChoices.innerHTML=''; setTimeout(()=> startRound(), 800); } } else { memoryText.textContent = "Wrong. Restarting..."; memoryChoices.innerHTML=''; setTimeout(()=> { pickSequence(); startRound(); }, 900); } } function unlockPage(){ minigame.style.transition = 'opacity 1s ease'; minigame.style.opacity = '0'; setTimeout(()=>{ minigame.style.display = 'none'; showMainPage(); }, 1000); } function shuffleArray(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
 
 /* =========================
    BOSS ARENA
