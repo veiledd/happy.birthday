@@ -285,23 +285,28 @@ function say(t, time=1500){
   setTimeout(()=> bossVoice.textContent = "", time);
 }
 
-/* ===== INPUT (FIXED SAFE STATE) ===== */
+/* ================= INPUT SYSTEM (FIXED) ================= */
+
 document.addEventListener("keydown", (e) => {
   keys[e.key] = true;
 
   if(!game || gameOver) return;
 
-  /* PARRY */
-  if(e.key === "Shift" && canParry){
+  /* ===== PARRY (F KEY) ===== */
+  if(e.key.toLowerCase() === "f" && canParry){
     canParry = false;
 
     enemyBullets = enemyBullets.filter(b => {
       const hit =
-        Math.abs(b.x - player.x) < 35 &&
-        Math.abs(b.y - player.y) < 35;
+        Math.abs(b.x - player.x) < 40 &&
+        Math.abs(b.y - player.y) < 40;
 
       if(hit){
-        playerBullets.push({x: player.x, y: player.y, dx: 0, dy: -8});
+        playerBullets.push({
+          x: player.x,
+          y: player.y,
+          dy: -8
+        });
         return false;
       }
       return true;
@@ -310,22 +315,23 @@ document.addEventListener("keydown", (e) => {
     say("Parry");
     setTimeout(()=> canParry = true, 450);
   }
-
-  /* ATTACK */
-  if(e.key === " "){ // SPACE
-    playerBullets.push({
-      x: player.x,
-      y: player.y,
-      dx: 0,
-      dy: -7
-    });
-  }
 });
 
+/* remove key when released */
 document.addEventListener("keyup", (e) => {
   keys[e.key] = false;
 });
 
+/* ===== ATTACK (MOUSE CLICK) ===== */
+canvas.addEventListener("click", (e) => {
+  if(!game || gameOver) return;
+
+  playerBullets.push({
+    x: player.x,
+    y: player.y,
+    dy: -7
+  });
+});
 /* ===== START ===== */
 function startBoss(){
   minigame.style.display = "none";
