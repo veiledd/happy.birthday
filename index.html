@@ -12,9 +12,57 @@ cd<!DOCTYPE html>
     font-family:'UnifrakturCook',cursive; text-align:center; overflow-x:hidden;
   }
 
-  /* ===== minigame UI ===== */
-  #minigame 
-  <div id="bossContainer" style="
+ /* ===== minigame UI ===== */
+#minigame {
+  position:fixed;
+  inset:0;
+  z-index:30;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  background:linear-gradient(#000,#120000);
+  padding:24px;
+}
+
+#memoryText {
+  color:#ff8b8b;
+  font-family:'IM Fell English',serif;
+  font-size:20px;
+  background: rgba(30,0,0,0.3);
+  padding:12px 18px;
+  border-radius:8px;
+  border:1px solid rgba(255,40,40,0.15);
+  backdrop-filter: blur(4px);
+}
+
+.options {
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:center;
+  max-width:900px;
+}
+
+.opt-btn {
+  background:rgba(0,0,0,0.7);
+  color:#ffbdbd;
+  border:2px solid #7a0b0b;
+  padding:10px 14px;
+  cursor:pointer;
+  font-family:'IM Fell English',serif;
+  transition:transform .12s, background .12s;
+}
+
+.opt-btn:hover{
+  transform:translateY(-4px);
+  background:#ff2a2a;
+  color:#080808;
+}
+
+/* ===== boss fight UI ===== */
+#bossContainer {
   display:none;
   position:fixed;
   inset:0;
@@ -23,113 +71,56 @@ cd<!DOCTYPE html>
   flex-direction:column;
   align-items:center;
   justify-content:center;
-">
+}
 
-  <div id="bossVoice" style="
-    color:#ff9b9b;
-    font-family:'IM Fell English',serif;
-    margin-bottom:10px;
-    height:24px;
-  "></div>
+#bossVoice {
+  color:#ff9b9b;
+  font-family:'IM Fell English',serif;
+  margin-bottom:10px;
+  height:24px;
+}
 
-  <canvas id="bossCanvas" width="500" height="600" style="
-    background: radial-gradient(circle, #220000, #000);
-    border:2px solid #7a0b0b;
-  "></canvas>
+#bossCanvas {
+  background: radial-gradient(circle, #220000, #000);
+  border:2px solid #7a0b0b;
+}
 
-  <button id="retryBoss" style="
-    display:none;
-    margin-top:20px;
-    padding:12px 24px;
-    background:#2a0000;
-    color:#ff4d4d;
-    border:2px solid #ff1a1a;
-    cursor:pointer;
-  ">Try Again</button>
+#retryBoss {
+  display:none;
+  margin-top:20px;
+  padding:12px 24px;
+  background:#2a0000;
+  color:#ff4d4d;
+  border:2px solid #ff1a1a;
+  cursor:pointer;
+}
 
-</div>
-  {
-    position:fixed; inset:0; z-index:30;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:18px; background:linear-gradient(#000,#120000);
-    padding:24px;
-  }
-  #memoryText {
-    color:#ff8b8b; font-family:'IM Fell English',serif; font-size:20px;
-    background: rgba(30,0,0,0.3); padding:12px 18px; border-radius:8px;
-    border:1px solid rgba(255,40,40,0.15);
-    backdrop-filter: blur(4px);
-  }
-  .options {
-    display:flex; gap:12px; flex-wrap:wrap; justify-content:center; max-width:900px;
-  }
-  .opt-btn {
-    background:rgba(0,0,0,0.7); color:#ffbdbd; border:2px solid #7a0b0b;
-    padding:10px 14px; cursor:pointer; font-family:'IM Fell English',serif;
-    transition:transform .12s, background .12s;
-  }
-  .opt-btn:hover{ transform:translateY(-4px); background:#ff2a2a; color:#080808; }
+/* ===== background & heart & particles ===== */
+.bg {
+  position:fixed;
+  inset:0;
+  z-index:0;
+  background: radial-gradient(circle at center, #6b0000 0%, #450000 35%, #230000 70%, #0b0000 100%);
+  animation:bgBreath 4s ease-in-out infinite;
+  display:none;
+}
 
-  /* ===== background & heart & particles ===== */
-  .bg {
-    position:fixed; inset:0; z-index:0;
-    background: radial-gradient(circle at center, #6b0000 0%, #450000 35%, #230000 70%, #0b0000 100%);
-    animation:bgBreath 4s ease-in-out infinite; display:none;
-  }
-  @keyframes bgBreath { 0%{filter:brightness(0.9)}50%{filter:brightness(1.08)}100%{filter:brightness(0.9)} }
+@keyframes bgBreath {
+  0%{filter:brightness(0.9)}
+  50%{filter:brightness(1.08)}
+  100%{filter:brightness(0.9)}
+}
 
-  /* Heart Character Wrapper (text heart) */
-  .heart-wrap {
-    position: fixed;
-    left: 50%;
-    top: 42%;
-    transform: translate(-50%, -50%);
-    z-index: 0;
-    width: min(40vmin, 180px);
-    max-width: 220px;
-    opacity: 0.95;
-    pointer-events: none;
-    transform-origin: center center;
-    animation: heartBeat 1.25s cubic-bezier(.2,.6,.2,1) infinite;
-    display: none; /* shown after minigame unlock */
-  }
-
-  .heart-char {
-    font-size: 6rem;
-    color: #ff1a1a;
-    text-shadow: 0 0 20px #b00000, 0 0 40px #ff1a1a;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:100%;
-    height:100%;
-    animation: bloodFlow 1.25s linear infinite;
-  }
-
-  /* Heartbeat keyframes (lub-dub rhythm) */
-  @keyframes heartBeat {
-    0%   { transform: translate(-50%, -50%) scale(1); }
-    10%  { transform: translate(-50%, -50%) scale(1.06); } /* lub */
-    20%  { transform: translate(-50%, -50%) scale(0.97); }
-    30%  { transform: translate(-50%, -50%) scale(1.14); } /* dub */
-    45%  { transform: translate(-50%, -50%) scale(1); }
-    60%  { transform: translate(-50%, -48%) scale(1.06); } /* afterbeat */
-    80%  { transform: translate(-50%, -50%) scale(1); }
-    100% { transform: translate(-50%, -50%) scale(1); }
-  }
-
-  /* subtle blood color pulse */
-  @keyframes bloodFlow {
-    0%   { color: #b00000; }
-    30%  { color: #ff1a1a; }
-    60%  { color: #9a0000; }
-    100% { color: #b00000; }
-  }
-
-  .particle {
-    position:fixed; width:4px; height:4px; background:rgba(255,50,50,0.7); border-radius:50%;
-    pointer-events:none; z-index:1; opacity:0.6;
-  }
+.particle {
+  position:fixed;
+  width:4px;
+  height:4px;
+  background:rgba(255,50,50,0.7);
+  border-radius:50%;
+  pointer-events:none;
+  z-index:1;
+  opacity:0.6;
+}
 
   /* ===== page content ===== */
   h1{ display:none; margin:0; padding-top:8vh; font-size:clamp(34px,6vw,72px);
