@@ -1,4 +1,4 @@
-cd<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -236,180 +236,152 @@ function handleChoice(choice){
 }
 
 /* -------------------
-   BOSS FIGHT (CINEMATIC)
+   BOSS FIGHT (WITH DEATH MEMORY)
 --------------------*/
+let deathCount = 0;
+
 function startBossFight(){
 
-  minigame.style.transition = "opacity 0.8s ease";
-  minigame.style.opacity = "0";
+  const arena = document.createElement('div');
+  arena.style.position = "fixed";
+  arena.style.inset = "0";
+  arena.style.zIndex = "50";
+  arena.style.background = "linear-gradient(180deg,#000,#1a0000,#000)";
+  arena.style.backgroundSize = "200% 200%";
+  arena.style.animation = "bgMove 6s ease infinite";
+  document.body.appendChild(arena);
 
-  setTimeout(()=>{
-    minigame.style.display = "none";
+  const style = document.createElement('style');
+  style.innerHTML = `
+    @keyframes bgMove {
+      0%{background-position:50% 0%;}
+      50%{background-position:50% 100%;}
+      100%{background-position:50% 0%;}
+    }
+  `;
+  document.head.appendChild(style);
 
-    const arena = document.createElement('div');
-    arena.style.position = "fixed";
-    arena.style.inset = "0";
-    arena.style.zIndex = "50";
-    arena.style.background = "linear-gradient(180deg,#000,#1a0000,#000)";
-    arena.style.backgroundSize = "200% 200%";
-    arena.style.animation = "bgMove 6s ease infinite";
-    document.body.appendChild(arena);
+  // voice text
+  const voice = document.createElement('div');
+  voice.style.position = "absolute";
+  voice.style.top = "12%";
+  voice.style.left = "50%";
+  voice.style.transform = "translateX(-50%)";
+  voice.style.color = "#ff9b9b";
+  voice.style.fontFamily = "'IM Fell English', serif";
+  voice.style.fontSize = "18px";
+  arena.appendChild(voice);
 
-    // styles
-    const style = document.createElement('style');
-    style.innerHTML = `
-      @keyframes bgMove {
-        0%{background-position:50% 0%;}
-        50%{background-position:50% 100%;}
-        100%{background-position:50% 0%;}
-      }
-    `;
-    document.head.appendChild(style);
+  function say(text){
+    voice.style.opacity = 0;
+    setTimeout(()=>{
+      voice.textContent = text;
+      voice.style.opacity = 1;
+    },200);
+  }
 
-    // voice text
-    const voice = document.createElement('div');
-    voice.style.position = "absolute";
-    voice.style.top = "12%";
-    voice.style.left = "50%";
-    voice.style.transform = "translateX(-50%)";
-    voice.style.color = "#ff9b9b";
-    voice.style.fontFamily = "'IM Fell English', serif";
-    voice.style.fontSize = "18px";
-    arena.appendChild(voice);
+  const introLines = ["…you remembered.","so you made it here.","you shouldn’t have."];
+  const retryLines = ["…again?","you came back.","still trying?"];
+  const angryLines = ["why do you persist?","you’re not meant to win.","stop."];
+  const finalLines = ["…just take it already.","why won’t you leave?","fine. have it."];
 
-    function say(text){
-      voice.style.opacity = 0;
+  if(deathCount === 0) say(introLines[Math.random()*introLines.length|0]);
+  else if(deathCount < 3) say(retryLines[Math.random()*retryLines.length|0]);
+  else if(deathCount < 6) say(angryLines[Math.random()*angryLines.length|0]);
+  else say(finalLines[Math.random()*finalLines.length|0]);
+
+  // player
+  const player = document.createElement('div');
+  player.style.width = "14px";
+  player.style.height = "14px";
+  player.style.background = "white";
+  player.style.position = "absolute";
+  arena.appendChild(player);
+
+  let x = window.innerWidth/2;
+  let y = window.innerHeight*0.8;
+
+  // movement
+  let keys = {};
+  document.addEventListener('keydown', e=>keys[e.key]=true);
+  document.addEventListener('keyup', e=>keys[e.key]=false);
+
+  function loop(){
+    if(keys['ArrowLeft']||keys['a']) x-=4;
+    if(keys['ArrowRight']||keys['d']) x+=4;
+    if(keys['ArrowUp']||keys['w']) y-=4;
+    if(keys['ArrowDown']||keys['s']) y+=4;
+
+    player.style.left = x+"px";
+    player.style.top = y+"px";
+
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  // boss
+  const boss = document.createElement('div');
+  boss.textContent = "♡";
+  boss.style.position = "absolute";
+  boss.style.left = "50%";
+  boss.style.top = "25%";
+  boss.style.transform = "translate(-50%,-50%)";
+  boss.style.fontSize = "90px";
+  boss.style.textShadow = "0 0 20px red";
+  arena.appendChild(boss);
+
+  let bossHP = 10;
+
+  boss.onclick = ()=>{
+    bossHP--;
+    boss.style.transform = "translate(-50%,-50%) scale(1.2)";
+    setTimeout(()=>boss.style.transform="translate(-50%,-50%) scale(1)",120);
+
+    if(bossHP <= 0){
+      say("…fine.");
       setTimeout(()=>{
-        voice.textContent = text;
-        voice.style.opacity = 1;
-      },200);
+        arena.remove();
+        unlockPage();
+      },800);
     }
+  };
 
-    // player
-    const player = document.createElement('div');
-    player.style.width = "14px";
-    player.style.height = "14px";
-    player.style.background = "white";
-    player.style.position = "absolute";
-    arena.appendChild(player);
+  // attacks
+  setInterval(()=>{
+    const atk = document.createElement('div');
+    atk.style.width="8px";
+    atk.style.height="8px";
+    atk.style.background="red";
+    atk.style.position="absolute";
+    atk.style.left=Math.random()*window.innerWidth+"px";
+    arena.appendChild(atk);
 
-    // trail
-    function trail(x,y){
-      const t = document.createElement('div');
-      t.style.position="absolute";
-      t.style.width="6px";
-      t.style.height="6px";
-      t.style.background="rgba(255,255,255,0.3)";
-      t.style.left=x+"px";
-      t.style.top=y+"px";
-      arena.appendChild(t);
-      setTimeout(()=>t.remove(),400);
-    }
+    let ay=0;
 
-    // boss
-    const boss = document.createElement('div');
-    boss.textContent = "♡";
-    boss.style.position = "absolute";
-    boss.style.left = "50%";
-    boss.style.top = "25%";
-    boss.style.transform = "translate(-50%,-50%)";
-    boss.style.fontSize = "90px";
-    boss.style.textShadow = "0 0 20px red";
-    arena.appendChild(boss);
+    function fall(){
+      ay+=6;
+      atk.style.top=ay+"px";
 
-    let bossHP = 12;
+      if(Math.abs(ay-y)<15 && Math.abs(parseInt(atk.style.left)-x)<15){
+        deathCount++;
+        say("…too slow.");
 
-    const lines = [
-      "…you came back.",
-      "this is what it feels like.",
-      "closer.",
-      "why do you persist?",
-      "you’re almost there."
-    ];
-
-    say("…you remembered.");
-
-    boss.onclick = ()=>{
-      bossHP--;
-
-      boss.style.transform = "translate(-50%,-50%) scale(1.2)";
-      setTimeout(()=>boss.style.transform="translate(-50%,-50%) scale(1)",120);
-
-      say(lines[Math.floor(Math.random()*lines.length)]);
-
-      // crack effect
-      boss.style.filter = `brightness(${1 + (12-bossHP)*0.1})`;
-
-      if(bossHP <= 0){
-        say("…take it.");
         setTimeout(()=>{
-          arena.style.opacity = "0";
-          setTimeout(()=>{
-            arena.remove();
-            unlockPage();
-          },1000);
-        },800);
-      }
-    };
-
-    // movement
-    let keys = {};
-    document.addEventListener('keydown', e=>keys[e.key]=true);
-    document.addEventListener('keyup', e=>keys[e.key]=false);
-
-    let x = window.innerWidth/2;
-    let y = window.innerHeight*0.8;
-
-    function loop(){
-      if(keys['ArrowLeft']||keys['a']) x-=4;
-      if(keys['ArrowRight']||keys['d']) x+=4;
-      if(keys['ArrowUp']||keys['w']) y-=4;
-      if(keys['ArrowDown']||keys['s']) y+=4;
-
-      player.style.left = x+"px";
-      player.style.top = y+"px";
-
-      trail(x,y);
-
-      requestAnimationFrame(loop);
-    }
-    loop();
-
-    // attacks
-    setInterval(()=>{
-      const atk = document.createElement('div');
-      atk.style.width="8px";
-      atk.style.height="8px";
-      atk.style.background="red";
-      atk.style.position="absolute";
-      atk.style.left=Math.random()*window.innerWidth+"px";
-      arena.appendChild(atk);
-
-      let ay=0;
-
-      function fall(){
-        ay+=6;
-        atk.style.top=ay+"px";
-
-        if(Math.abs(ay-y)<15 && Math.abs(parseInt(atk.style.left)-x)<15){
-          say("…too slow.");
           arena.remove();
-          pickSequence();
-          startRound();
-        }
-
-        if(ay<window.innerHeight){
-          requestAnimationFrame(fall);
-        } else atk.remove();
+          startBossFight(); // restart boss only
+        },500);
       }
-      fall();
-    },600);
 
-  },800);
+      if(ay<window.innerHeight){
+        requestAnimationFrame(fall);
+      } else atk.remove();
+    }
+    fall();
+  },600);
 }
 
 /* -------------------
-   MAIN PAGE UNLOCK
+   MAIN PAGE
 --------------------*/
 const bg = document.getElementById('bg');
 const heartWrap = document.getElementById('heartWrap');
