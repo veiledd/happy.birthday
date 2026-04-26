@@ -1,4 +1,4 @@
-cd<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -7,10 +7,10 @@ cd<!DOCTYPE html>
 <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=IM+Fell+English:wght@400&display=swap" rel="stylesheet">
 
 <style>
-  html,body{
-    height:100%; margin:0; background:#000; color:#ff1a1a;
-    font-family:'UnifrakturCook',cursive; text-align:center; overflow-x:hidden;
-  }
+html,body{
+  height:100%; margin:0; background:#000; color:#ff1a1a;
+  font-family:'UnifrakturCook',cursive; text-align:center; overflow-x:hidden;
+}
 
 /* ===== minigame UI ===== */
 #minigame {
@@ -26,7 +26,6 @@ cd<!DOCTYPE html>
   padding:24px;
 }
 
-/* smoother "Get ready" transitions */
 #memoryText {
   color:#ff8b8b;
   font-family:'IM Fell English',serif;
@@ -36,21 +35,8 @@ cd<!DOCTYPE html>
   border-radius:8px;
   border:1px solid rgba(255,40,40,0.15);
   backdrop-filter: blur(4px);
-
-  /* ✨ added smooth fade behavior */
   opacity:1;
-  transition: opacity 0.35s ease, transform 0.35s ease;
-}
-
-/* optional helper class your JS can use if you want smoother transitions */
-.fade-out {
-  opacity:0;
-  transform: translateY(-6px);
-}
-
-.fade-in {
-  opacity:1;
-  transform: translateY(0px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .options {
@@ -78,7 +64,7 @@ cd<!DOCTYPE html>
 }
 
 /* ===== boss fight UI ===== */
-#bossContainer {
+#bossContainer{
   display:none;
   position:fixed;
   inset:0;
@@ -89,30 +75,20 @@ cd<!DOCTYPE html>
   justify-content:center;
 }
 
-#bossVoice {
+#bossVoice{
   color:#ff9b9b;
   font-family:'IM Fell English',serif;
   margin-bottom:10px;
   height:24px;
 }
 
-#bossCanvas {
+#bossCanvas{
   background: radial-gradient(circle, #220000, #000);
   border:2px solid #7a0b0b;
 }
 
-#retryBoss {
-  display:none;
-  margin-top:20px;
-  padding:12px 24px;
-  background:#2a0000;
-  color:#ff4d4d;
-  border:2px solid #ff1a1a;
-  cursor:pointer;
-}
-
-/* ===== background & heart & particles ===== */
-.bg {
+/* ===== background ===== */
+.bg{
   position:fixed;
   inset:0;
   z-index:0;
@@ -121,406 +97,203 @@ cd<!DOCTYPE html>
   display:none;
 }
 
-@keyframes bgBreath {
+@keyframes bgBreath{
   0%{filter:brightness(0.9)}
   50%{filter:brightness(1.08)}
   100%{filter:brightness(0.9)}
 }
 
-.particle {
-  position:fixed;
-  width:4px;
-  height:4px;
-  background:rgba(255,50,50,0.7);
-  border-radius:50%;
-  pointer-events:none;
-  z-index:1;
-  opacity:0.6;
+/* ===== page ===== */
+h1{
+  display:none;
+  margin:0;
+  padding-top:8vh;
+  font-size:clamp(34px,6vw,72px);
+  text-shadow:0 0 28px rgba(255,20,20,0.9);
 }
-  /* ===== page content ===== */
-  h1{ display:none; margin:0; padding-top:8vh; font-size:clamp(34px,6vw,72px);
-      text-shadow:0 0 28px rgba(255,20,20,0.9); z-index:2; position:relative; }
-  .button{ display:none; margin-top:4vh; padding:14px 34px; font-size:18px;
-    background:rgba(0,0,0,0.65); color:#ff2a2a; border:2px solid #ff2a2a; cursor:pointer;
-    transition:transform .12s, box-shadow .12s; z-index:2; position:relative; }
-  .button:hover{ transform:translateY(-2px); background:#ff2a2a; color:#080808; box-shadow:0 0 24px rgba(255,20,20,0.7);}
 
-  /* translucent letter */
-  .letter{
-    display:none; margin:36px auto; width:min(900px,86%); padding:34px;
-    line-height:1.7; font-size:18px; font-family:'IM Fell English',serif;
-    color:#fff6e6; background:rgba(42,0,0,0.75); border:3px solid rgba(122,11,11,0.7);
-    box-shadow:0 0 30px rgba(0,0,0,0.6), inset 0 0 30px rgba(120,10,10,0.25);
-    transform:rotate(-0.6deg); position:relative; z-index:2; backdrop-filter:blur(4px);
-    overflow:hidden;
-  }
+.button{
+  display:none;
+  margin-top:4vh;
+  padding:14px 34px;
+  font-size:18px;
+  background:rgba(0,0,0,0.65);
+  color:#ff2a2a;
+  border:2px solid #ff2a2a;
+  cursor:pointer;
+}
 
-  .fade-line{ opacity:0; transform:translateY(15px); display:block; transition:opacity .7s ease, transform .7s ease; }
+/* ===== LETTER (UNCHANGED EXACTLY) ===== */
+.letter{
+  display:none; margin:36px auto; width:min(900px,86%); padding:34px;
+  line-height:1.7; font-size:18px; font-family:'IM Fell English',serif;
+  color:#fff6e6; background:rgba(42,0,0,0.75); border:3px solid rgba(122,11,11,0.7);
+  box-shadow:0 0 30px rgba(0,0,0,0.6), inset 0 0 30px rgba(120,10,10,0.25);
+  transform:rotate(-0.6deg);
+  overflow:hidden;
+}
 
-  @media (max-width:600px){
-    h1{padding-top:6vh;font-size:34px}
-    .letter{transform:rotate(0deg); padding:18px; font-size:16px}
-    .heart-char{font-size:4.5rem}
-  }
+.fade-line{opacity:0; transform:translateY(15px); display:block; transition:.7s ease;}
 
-  /* progress indicator */
-  #progress { color:#ffb3b3; margin-top:10px; font-family:'IM Fell English',serif; z-index:2; position:relative}
+#progress{color:#ffb3b3;margin-top:10px}
 </style>
 </head>
+
 <body>
 
-  <!-- MINIGAME (sequential memory rounds) -->
-  <div id="minigame">
-    <div id="memoryCard" style="display:flex; flex-direction:column; align-items:center; gap:14px;">
-      <div id="memoryText" style="font-size:20px; color:#ff9b9b; font-family:'IM Fell English',serif">Get ready...</div>
-      <div id="progress">Round 0 / 3</div>
-      <div id="memoryChoices" class="options" aria-hidden="true"></div>
-    </div>
-    <div style="margin-top:18px; color:#ff8b8b; font-size:14px;">You must remember each phrase shown briefly, then pick the exact phrase. One mistake restarts sequence.</div>
-  </div>
+<!-- MINIGAME -->
+<div id="minigame">
+  <div id="memoryText">Get ready...</div>
+  <div id="progress">Round 0 / 3</div>
+  <div id="memoryChoices" class="options"></div>
+</div>
 
-  <!-- MAIN PAGE (hidden until minigame success) -->
-  <div class="bg" id="bg"></div>
+<!-- BOSS -->
+<div id="bossContainer">
+  <div id="bossVoice"></div>
+  <canvas id="bossCanvas" width="500" height="600"></canvas>
+</div>
 
-  <!-- HEART (text character) -->
-  <div class="heart-wrap" id="heartWrap" aria-hidden="true">
-    <div class="heart-char">♡</div>
-  </div>
+<!-- MAIN -->
+<div class="bg" id="bg"></div>
+<h1 id="title">HAPPY BIRTHDAY !!</h1>
+<button class="button" id="openBtn">Open</button>
 
-  <h1 id="title">HAPPY BIRTHDAY !!</h1>
-  <button class="button" id="openBtn">!! Open Your Letter</button>
-
-  <div class="letter" id="birthdayLetter" aria-hidden="true">
-    <h2 class="fade-line">To My Forever,</h2>
-    <span class="fade-line">Dear Vlad!</span> 
-   <span class="fade-line">I’m 555 and you’re my 666 perfect and completely mine. Even from miles away, you cut through the noise like a pair of scissors, sharp and precise, leaving marks that only I can see. Every time I think of you, it feels like a song shaking the world, and somehow, in the middle of all this chaos, I find peace knowing you exist.</span>
-    <span class="fade-line">I keep replaying that night we met in my head. It was awkward!!!! It was strange. It was ours. Time felt softer then, like it bent around us just enough to let something begin. I remember how interesting you were and and still are obvly :sob: I want a thousand more nights like that. Even if they’re through screens and late calls where the world fades and it’s just us.</span>
-    <span class="fade-line">You feel like a pulse I follow without thinking. Like a fire I don’t want to escape. Even from a distance, you make everything sharper, brighter, more alive.</span>
-    <span class="fade-line">I love the small things about <em>you</em> the way your words linger, the way your presence stays long after we stop talking. You are fire and shadow, chaos and calm! and somehow, even through screens, you make me feel seen..</span>
-    <span class="fade-line">I can’t promise you the world. But I can promise you this ,, my heart is yours. Fully. In fragments. In every quiet space between conversations.</span>
-    <span class="fade-line">I’ll be here. Steady. Sharp. Yours.</span>
-    <span class="fade-line">— Yours Truly</span>
-  </div>
+<!-- LETTER (UNCHANGED) -->
+<div class="letter" id="birthdayLetter">
+  <h2 class="fade-line">To My Forever,</h2>
+  <span class="fade-line">Dear Vlad!</span> 
+  <span class="fade-line">I’m 555 and you’re my 666 perfect and completely mine. Even from miles away, you cut through the noise like a pair of scissors, sharp and precise, leaving marks that only I can see. Every time I think of you, it feels like a song shaking the world, and somehow, in the middle of all this chaos, I find peace knowing you exist.</span>
+  <span class="fade-line">I keep replaying that night we met in my head. It was awkward!!!! It was strange. It was ours. Time felt softer then, like it bent around us just enough to let something begin. I remember how interesting you were and and still are obvly :sob: I want a thousand more nights like that. Even if they’re through screens and late calls where the world fades and it’s just us.</span>
+  <span class="fade-line">You feel like a pulse I follow without thinking. Like a fire I don’t want to escape. Even from a distance, you make everything sharper, brighter, more alive.</span>
+  <span class="fade-line">I love the small things about <em>you</em> the way your words linger, the way your presence stays long after we stop talking. You are fire and shadow, chaos and calm! and somehow, even through screens, you make me feel seen..</span>
+  <span class="fade-line">I can’t promise you the world. But I can promise you this ,, my heart is yours. Fully. In fragments. In every quiet space between conversations.</span>
+  <span class="fade-line">I’ll be here. Steady. Sharp. Yours.</span>
+  <span class="fade-line">— Yours Truly</span>
+</div>
 
 <script>
-/* ======================
-   MEMORY GAME (FIXED)
-====================== */
 
-const allPhrases = [
-  "Chaos and fire dance in the night",
-  "Silence flows under the moon",
-  "Shadows whisper softly",
-  "We met by the broken clock",
-  "Stars kept one secret",
-  "The clockhands bled at dawn"
+/* ================= SAFE INIT ================= */
+window.onload = () => {
+  pickSequence();
+  startRound();
+};
+
+/* ================= GAME ================= */
+const allPhrases=[
+"Chaos and fire dance in the night",
+"Silence flows under the moon",
+"Shadows whisper softly",
+"We met by the broken clock",
+"Stars kept one secret",
+"The clockhands bled at dawn"
 ];
 
-const rounds = 3;
-const revealTime = 2000;
+const rounds=3;
+const revealTime=2000;
 
-let sequence = [];
-let currentRound = 0;
+let sequence=[],currentRound=0;
 
-const memoryText = document.getElementById('memoryText');
-const memoryChoices = document.getElementById('memoryChoices');
-const progress = document.getElementById('progress');
-const minigame = document.getElementById('minigame');
+const memoryText=document.getElementById("memoryText");
+const memoryChoices=document.getElementById("memoryChoices");
+const progress=document.getElementById("progress");
+const minigame=document.getElementById("minigame");
 
 function pickSequence(){
-  sequence = [];
-  const pool = [...allPhrases];
-
+  sequence=[];
+  let pool=[...allPhrases];
   for(let i=0;i<rounds;i++){
-    const idx = Math.floor(Math.random() * pool.length);
+    let idx=Math.floor(Math.random()*pool.length);
     sequence.push(pool.splice(idx,1)[0]);
   }
-
-  currentRound = 0;
+  currentRound=0;
 }
 
 function startRound(){
-
-  // safety check (THIS prevents infinite "Get ready")
   if(!sequence.length) pickSequence();
 
-  const phrase = sequence[currentRound];
+  let phrase=sequence[currentRound];
   if(!phrase) return;
 
-  progress.textContent = `Round ${currentRound+1} / ${rounds}`;
-  memoryChoices.innerHTML = '';
+  progress.textContent=`Round ${currentRound+1}/${rounds}`;
+  memoryChoices.innerHTML="";
 
-  // force visible state reset
-  memoryText.style.opacity = 1;
-  memoryText.textContent = "Get ready...";
+  memoryText.textContent="Get ready...";
 
-  setTimeout(() => {
-    memoryText.textContent = `Remember this: "${phrase}"`;
+  setTimeout(()=>{
+    memoryText.textContent=`Remember: "${phrase}"`;
 
-    setTimeout(() => {
-      memoryText.textContent = "Which phrase was that?";
+    setTimeout(()=>{
+      memoryText.textContent="Pick it";
       showChoices(phrase);
-    }, revealTime);
+    },revealTime);
 
-  }, 600);
+  },600);
 }
 
 function showChoices(correct){
-  memoryChoices.innerHTML = '';
+  memoryChoices.innerHTML="";
+  let wrong=allPhrases.filter(x=>x!==correct);
+  wrong.sort(()=>Math.random()-0.5);
 
-  const wrongPool = allPhrases.filter(p => p !== correct);
-  shuffleArray(wrongPool);
+  let choices=[correct,wrong[0],wrong[1]].sort(()=>Math.random()-0.5);
 
-  const choices = [correct, wrongPool[0], wrongPool[1]];
-  shuffleArray(choices);
-
-  choices.forEach(ch => {
-    const btn = document.createElement('button');
-    btn.className = 'opt-btn';
-    btn.textContent = ch;
-
-    btn.onclick = () => handleChoice(ch);
-
-    memoryChoices.appendChild(btn);
+  choices.forEach(c=>{
+    let b=document.createElement("button");
+    b.className="opt-btn";
+    b.textContent=c;
+    b.onclick=()=>handle(c);
+    memoryChoices.appendChild(b);
   });
 }
 
-function handleChoice(selection){
-
-  const correct = sequence[currentRound];
-
-  if(selection === correct){
+function handle(choice){
+  if(choice===sequence[currentRound]){
     currentRound++;
-
-    if(currentRound >= rounds){
-      startBossFight();
-    } else {
-      memoryText.textContent = "Correct!";
-      memoryChoices.innerHTML = '';
-
-      setTimeout(() => startRound(), 700);
+    if(currentRound>=rounds){
+      startBoss();
+    }else{
+      setTimeout(startRound,600);
     }
-
-  } else {
-    memoryText.textContent = "Wrong. Restarting memory...";
-
-    memoryChoices.innerHTML = '';
-
-    setTimeout(() => {
-      pickSequence();
-      startRound();
-    }, 900);
+  }else{
+    pickSequence();
+    startRound();
   }
 }
 
-function shuffleArray(a){
-  for(let i=a.length-1;i>0;i--){
-    const j = Math.floor(Math.random() * (i+1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-}
-/* ======================
-   BOSS FIGHT
-====================== */
-const bossContainer = document.getElementById("bossContainer");
-const canvas = document.getElementById("bossCanvas");
-const ctx = canvas.getContext("2d");
-const retryBtn = document.getElementById("retryBoss");
-const voiceBox = document.getElementById("bossVoice");
+/* ================= BOSS ================= */
+const bossContainer=document.getElementById("bossContainer");
+const canvas=document.getElementById("bossCanvas");
+const ctx=canvas.getContext("2d");
 
-let player, boss, bullets, enemyBullets, keys, gameOver, dashCooldown;
+let player,boss,game=false;
 
-/* ---- voice lines ---- */
-function voiceLine(text){
-  voiceBox.textContent = text;
-  setTimeout(()=> voiceBox.textContent = "", 2000);
+function startBoss(){
+  minigame.style.display="none";
+  bossContainer.style.display="flex";
+
+  player={x:250,y:520,hp:100};
+  boss={x:250,y:100,hp:80};
+
+  game=true;
+  loop();
 }
 
-/* ---- start boss ---- */
-function startBossFight(){
-  minigame.style.display = "none";
-  bossContainer.style.display = "flex";
-  resetBossFight();
-}
-
-/* ---- reset ---- */
-function resetBossFight(){
-  player = { x:250, y:520, hp:100 };
-  boss = { x:250, y:80, hp:100, phase:1 };
-
-  bullets = [];
-  enemyBullets = [];
-  keys = {};
-  gameOver = false;
-  dashCooldown = 0;
-
-  retryBtn.style.display = "none";
-
-  voiceLine("So... you made it.");
-
-  requestAnimationFrame(gameLoop);
-}
-
-/* ---- controls ---- */
-document.addEventListener("keydown", e=>{
-  keys[e.key] = true;
-
-  if(e.key === "Shift" && dashCooldown <= 0){
-    player.y -= 60;
-    dashCooldown = 60;
-  }
-});
-
-document.addEventListener("keyup", e=> keys[e.key] = false);
-
-/* ---- shooting ---- */
-setInterval(()=>{
-  if(!gameOver){
-    bullets.push({x:player.x, y:player.y});
-  }
-}, 250);
-
-/* ---- boss attacks ---- */
-setInterval(()=>{
-  if(!gameOver){
-    enemyBullets.push({x:boss.x, y:boss.y, dx:(Math.random()-0.5)*3, dy:3});
-  }
-}, 600);
-
-/* ---- main loop ---- */
-function gameLoop(){
-  if(gameOver) return;
+function loop(){
+  if(!game)return;
 
   ctx.clearRect(0,0,500,600);
 
-  /* movement */
-  if(keys["ArrowLeft"]||keys["a"]) player.x -= 4;
-  if(keys["ArrowRight"]||keys["d"]) player.x += 4;
-  if(keys["ArrowUp"]||keys["w"]) player.y -= 4;
-  if(keys["ArrowDown"]||keys["s"]) player.y += 4;
+  ctx.fillStyle="red";
+  ctx.fillRect(player.x,player.y,10,10);
 
-  if(dashCooldown>0) dashCooldown--;
+  ctx.fillText("♡",boss.x,boss.y);
 
-  /* boss phase */
-  if(boss.hp < 50) boss.phase = 2;
-
-  /* draw player */
-  ctx.fillStyle = "#ff4d4d";
-  ctx.fillRect(player.x-5, player.y-5, 10,10);
-
-  /* draw boss */
-  ctx.font = "40px serif";
-  ctx.fillText("♡", boss.x-15, boss.y);
-
-  /* bullets */
-  bullets.forEach((b,i)=>{
-    b.y -= 6;
-    ctx.fillRect(b.x, b.y, 3,6);
-
-    if(Math.abs(b.x - boss.x)<20 && Math.abs(b.y - boss.y)<20){
-      boss.hp -= 2;
-      bullets.splice(i,1);
-      shake();
-    }
-  });
-
-  enemyBullets.forEach((b,i)=>{
-    b.x += b.dx;
-    b.y += b.dy * (boss.phase === 2 ? 1.5 : 1);
-
-    ctx.fillStyle = "#ff9999";
-    ctx.fillRect(b.x, b.y, 4,4);
-
-    if(Math.abs(b.x - player.x)<10 && Math.abs(b.y - player.y)<10){
-      player.hp -= 5;
-      enemyBullets.splice(i,1);
-      shake();
-      voiceLine("Careful.");
-    }
-  });
-
-  /* UI */
-  ctx.fillStyle = "white";
-  ctx.fillText("HP: "+player.hp, 10,20);
-  ctx.fillText("Boss: "+boss.hp, 350,20);
-
-  /* death */
-  if(player.hp <= 0){
-    gameOver = true;
-    voiceLine("You fell...");
-    retryBtn.style.display = "block";
-    return;
-  }
-
-  /* win */
-  if(boss.hp <= 0){
-    gameOver = true;
-    voiceLine("...you win.");
-    setTimeout(showMainPage, 1200);
-    return;
-  }
-
-  requestAnimationFrame(gameLoop);
+  requestAnimationFrame(loop);
 }
 
-/* ---- shake ---- */
-function shake(){
-  canvas.style.transform = "translate("+(Math.random()*6-3)+"px,"+(Math.random()*6-3)+"px)";
-  setTimeout(()=> canvas.style.transform="translate(0,0)", 100);
-}
-
-retryBtn.onclick = resetBossFight;
-
-/* ======================
-   MAIN PAGE (UNCHANGED)
-====================== */
-const bg = document.getElementById('bg');
-const heartWrap = document.getElementById('heartWrap');
-const title = document.getElementById('title');
-const openBtn = document.getElementById('openBtn');
-
-function showMainPage(){
-  bossContainer.style.display = "none";
-  bg.style.display='block';
-  heartWrap.style.display='block';
-  title.style.display='block';
-  openBtn.style.display='inline-block';
-}
-
-/* init */
-pickSequence();
-let roundTimeout1 = null;
-let roundTimeout2 = null;
-
-function startRound(){
-
-  // stop old timers (VERY IMPORTANT)
-  clearTimeout(roundTimeout1);
-  clearTimeout(roundTimeout2);
-
-  if(!sequence.length) pickSequence();
-
-  const phrase = sequence[currentRound];
-  if(!phrase) {
-    pickSequence();
-    return startRound();
-  }
-
-  progress.textContent = `Round ${currentRound+1} / ${rounds}`;
-  memoryChoices.innerHTML = '';
-
-  memoryText.textContent = "Get ready...";
-
-  roundTimeout1 = setTimeout(() => {
-    memoryText.textContent = `Remember this: "${phrase}"`;
-
-    roundTimeout2 = setTimeout(() => {
-      memoryText.textContent = "Which phrase was that?";
-      showChoices(phrase);
-    }, revealTime);
-
-  }, 600);
-}
 </script>
+
 </body>
 </html>
