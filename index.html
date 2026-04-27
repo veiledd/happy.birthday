@@ -8,54 +8,132 @@
 
 <style>
 html,body{
-  height:100%; margin:0; background:#000; color:#ff1a1a;
-  font-family:'UnifrakturCook',cursive; text-align:center; overflow:hidden;
+  height:100%;
+  margin:0;
+  background:#000;
+  color:#ff1a1a;
+  font-family:'UnifrakturCook',cursive;
+  text-align:center;
+  overflow:hidden;
 }
 
 /* ===== minigame ===== */
 #minigame{
-  position:fixed; inset:0; z-index:30;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:18px; background:linear-gradient(#000,#120000);
+  position:fixed;
+  inset:0;
+  z-index:30;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  background:linear-gradient(#000,#120000);
 }
 
-.options{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
+#memoryText{
+  color:#ff8b8b;
+  font-family:'IM Fell English',serif;
+  font-size:20px;
+  background:rgba(30,0,0,0.3);
+  padding:12px 18px;
+  border-radius:8px;
+  border:1px solid rgba(255,40,40,0.15);
+  backdrop-filter: blur(4px);
+  opacity:1;
+  transition:opacity 0.3s ease, transform 0.3s ease;
+}
+
+.options{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:center;
+  max-width:900px;
+}
 
 .opt-btn{
-  background:#000; color:#ffbdbd; border:2px solid #7a0b0b;
-  padding:10px; cursor:pointer;
+  background:#000;
+  color:#ffbdbd;
+  border:2px solid #7a0b0b;
+  padding:10px 14px;
+  cursor:pointer;
+  font-family:'IM Fell English',serif;
+  transition:transform .12s, background .12s;
+}
+
+.opt-btn:hover{
+  transform:translateY(-4px);
+  background:#ff2a2a;
+  color:#080808;
 }
 
 /* ===== boss ===== */
 #bossContainer{
   display:none;
-  position:fixed; inset:0;
+  position:fixed;
+  inset:0;
   background:#000;
-  display:flex;
   align-items:center;
   justify-content:center;
   flex-direction:column;
+  z-index:25;
 }
 
-#bossCanvas{border:2px solid red;}
-#bossVoice{color:#ff9999; height:24px; margin-bottom:10px;}
+#bossCanvas{
+  border:2px solid red;
+  background:#000;
+}
+
+#bossVoice{
+  color:#ff9999;
+  height:24px;
+  margin-bottom:10px;
+  font-family:'IM Fell English',serif;
+}
 
 /* ===== main ===== */
-.bg{display:none; position:fixed; inset:0; background:#1a0000;}
-h1{display:none;}
-.button{display:none; padding:12px; margin-top:20px;}
+.bg{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#1a0000;
+  z-index:0;
+}
+
+h1{
+  display:none;
+  position:relative;
+  z-index:2;
+}
+
+.button{
+  display:none;
+  padding:12px;
+  margin-top:20px;
+  position:relative;
+  z-index:2;
+  background:#000;
+  color:#ff2a2a;
+  border:2px solid #ff2a2a;
+  cursor:pointer;
+}
 
 .letter{
   display:none;
   margin:40px auto;
   width:80%;
   color:white;
+  position:relative;
+  z-index:2;
+  font-family:'IM Fell English',serif;
+  line-height:1.7;
 }
 
 .fade-line{
   opacity:0;
   transform:translateY(10px);
   transition:0.6s;
+  display:block;
 }
 </style>
 </head>
@@ -94,153 +172,215 @@ h1{display:none;}
 </div>
 
 <script>
+/* ======================
+   MEMORY GAME (FIXED)
+====================== */
 
-/* ===== MEMORY GAME ===== */
-const phrases=[
-"Chaos and fire dance in the night",
-"Silence flows under the moon",
-"Shadows whisper softly",
-"We met by the broken clock",
-"Stars kept one secret",
-"The clockhands bled at dawn"
+const allPhrases = [
+  "Chaos and fire dance in the night",
+  "Silence flows under the moon",
+  "Shadows whisper softly",
+  "We met by the broken clock",
+  "Stars kept one secret",
+  "The clockhands bled at dawn"
 ];
 
-let seq=[],round=0;
+const rounds = 3;
+const revealTime = 2000;
 
-const text=document.getElementById("memoryText");
-const choices=document.getElementById("memoryChoices");
-const progress=document.getElementById("progress");
+let sequence = [];
+let currentRound = 0;
+let roundTimer1 = null;
+let roundTimer2 = null;
 
-function newSeq(){
-  seq=[...phrases].sort(()=>Math.random()-0.5).slice(0,3);
-  round=0;
+const memoryText = document.getElementById("memoryText");
+const memoryChoices = document.getElementById("memoryChoices");
+const progress = document.getElementById("progress");
+const minigame = document.getElementById("minigame");
+
+function pickSequence(){
+  sequence = [];
+  const pool = [...allPhrases];
+
+  for(let i=0;i<rounds;i++){
+    const idx = Math.floor(Math.random() * pool.length);
+    sequence.push(pool.splice(idx, 1)[0]);
+  }
+
+  currentRound = 0;
 }
 
 function startRound(){
-  let p=seq[round];
-  progress.textContent=`Round ${round+1}/3`;
-  choices.innerHTML="";
-  text.textContent="Get ready...";
+  clearTimeout(roundTimer1);
+  clearTimeout(roundTimer2);
 
-  setTimeout(()=>{
-    text.textContent=`"${p}"`;
-    setTimeout(()=>{
-      text.textContent="Pick it";
-      showChoices(p);
-    },1500);
-  },500);
-}
+  if(!sequence.length) pickSequence();
 
-function showChoices(correct){
-  let arr=[correct,...phrases.filter(x=>x!==correct).slice(0,2)];
-  arr.sort(()=>Math.random()-0.5);
+  const phrase = sequence[currentRound];
+  if(!phrase) {
+    pickSequence();
+    return startRound();
+  }
 
-  arr.forEach(a=>{
-    let b=document.createElement("button");
-    b.className="opt-btn";
-    b.textContent=a;
-    b.onclick=()=>choose(a);
-    choices.appendChild(b);
+  progress.textContent = `Round ${currentRound + 1} / ${rounds}`;
+  memoryChoices.innerHTML = "";
+  memoryText.textContent = "Get ready...";
+
+  requestAnimationFrame(() => {
+    roundTimer1 = setTimeout(() => {
+      memoryText.textContent = `Remember this: "${phrase}"`;
+
+      roundTimer2 = setTimeout(() => {
+        memoryText.textContent = "Pick it";
+        showChoices(phrase);
+      }, revealTime);
+
+    }, 500);
   });
 }
 
-function choose(c){
-  if(c===seq[round]){
-    round++;
-    if(round>=3) startBoss();
-    else setTimeout(startRound,500);
+function showChoices(correct){
+  memoryChoices.innerHTML = "";
+
+  const wrong = allPhrases.filter(x => x !== correct);
+  wrong.sort(() => Math.random() - 0.5);
+
+  const choices = [correct, wrong[0], wrong[1]];
+  choices.sort(() => Math.random() - 0.5);
+
+  choices.forEach(c => {
+    const b = document.createElement("button");
+    b.className = "opt-btn";
+    b.textContent = c;
+    b.onclick = () => handle(c);
+    memoryChoices.appendChild(b);
+  });
+}
+
+function handle(choice){
+  if(choice === sequence[currentRound]){
+    currentRound++;
+    if(currentRound >= rounds){
+      startBoss();
+    }else{
+      setTimeout(startRound, 500);
+    }
   }else{
-    newSeq();
+    pickSequence();
     startRound();
   }
 }
 
-/* ===== BOSS (FIXED LOOP SYSTEM) ===== */
-const canvas=document.getElementById("bossCanvas");
-const ctx=canvas.getContext("2d");
-const bossDiv=document.getElementById("bossContainer");
-const voice=document.getElementById("bossVoice");
+/* ======================
+   BOSS
+====================== */
+const canvas = document.getElementById("bossCanvas");
+const ctx = canvas.getContext("2d");
+const bossDiv = document.getElementById("bossContainer");
+const voice = document.getElementById("bossVoice");
 
-let player,boss,bullets=[],enemy=[],keys={};
-let running=true;
+let player, boss, bullets = [], enemy = [], keys = {};
+let game = false;
 
-/* INPUT */
-document.addEventListener("keydown",e=>{
-  keys[e.key]=true;
-
-  if(e.key==="f"){
-    enemy=[]; // parry clears bullets
-    voice.textContent="Parry.";
-    setTimeout(()=>voice.textContent="",500);
-  }
-});
-document.addEventListener("keyup",e=>keys[e.key]=false);
-
-canvas.onclick=()=>{
-  bullets.push({x:player.x,y:player.y});
-};
-
-/* START */
-function startBoss(){
-  document.getElementById("minigame").style.display="none";
-  bossDiv.style.display="flex";
-
-  player={x:250,y:500,hp:100};
-  boss={x:250,y:100,hp:100};
-
-  bullets=[]; enemy=[]; keys={};
-
-  voice.textContent="You remembered.";
-  setTimeout(()=>voice.textContent="",1000);
-
-  running=true;
+function say(t, d = 1200){
+  voice.textContent = t;
+  game = false;
+  setTimeout(() => {
+    voice.textContent = "";
+    game = true;
+    loop();
+  }, d);
 }
 
-/* ENEMY SHOOT */
-setInterval(()=>{
-  if(running) enemy.push({x:boss.x,y:boss.y});
-},700);
+document.addEventListener("keydown", e => {
+  keys[e.key] = true;
 
-/* MAIN LOOP (NEVER STOPS) */
+  if(e.key.toLowerCase() === "f" && game){
+    enemy = [];
+    say("Parry.");
+  }
+});
+
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+canvas.addEventListener("click", () => {
+  if(game){
+    bullets.push({x: player.x, y: player.y});
+  }
+});
+
+function startBoss(){
+  minigame.style.display = "none";
+  bossDiv.style.display = "flex";
+
+  player = { x: 250, y: 500, hp: 100 };
+  boss = { x: 250, y: 100, hp: 100 };
+
+  bullets = [];
+  enemy = [];
+  keys = {};
+
+  game = true;
+
+  voice.textContent = "You remembered.";
+  setTimeout(() => voice.textContent = "", 1000);
+
+  loop();
+}
+
+setInterval(() => {
+  if(game) enemy.push({x: boss.x, y: boss.y});
+}, 700);
+
 function loop(){
-  ctx.clearRect(0,0,500,600);
+  ctx.clearRect(0, 0, 500, 600);
 
-  if(running){
+  if(game){
+    if(keys["a"] || keys["ArrowLeft"]) player.x -= 4;
+    if(keys["d"] || keys["ArrowRight"]) player.x += 4;
+    if(keys["w"] || keys["ArrowUp"]) player.y -= 4;
+    if(keys["s"] || keys["ArrowDown"]) player.y += 4;
 
-    if(keys["a"])player.x-=4;
-    if(keys["d"])player.x+=4;
-    if(keys["w"])player.y-=4;
-    if(keys["s"])player.y+=4;
+    player.x = Math.max(0, Math.min(490, player.x));
+    player.y = Math.max(0, Math.min(590, player.y));
 
-    ctx.fillRect(player.x,player.y,10,10);
-    ctx.fillText("♡",boss.x,boss.y);
+    ctx.fillStyle = "#ff4d4d";
+    ctx.fillRect(player.x, player.y, 10, 10);
 
-    bullets.forEach((b,i)=>{
-      b.y-=6;
-      ctx.fillRect(b.x,b.y,3,6);
-      if(Math.abs(b.x-boss.x)<20&&Math.abs(b.y-boss.y)<20){
-        boss.hp-=2;bullets.splice(i,1);
+    ctx.fillStyle = "#fff";
+    ctx.font = "28px serif";
+    ctx.fillText("♡", boss.x, boss.y);
+
+    bullets.forEach((b, i) => {
+      b.y -= 6;
+      ctx.fillRect(b.x, b.y, 3, 6);
+      if(Math.abs(b.x - boss.x) < 20 && Math.abs(b.y - boss.y) < 20){
+        boss.hp -= 2;
+        bullets.splice(i, 1);
       }
     });
 
-    enemy.forEach((e,i)=>{
-      e.y+=4;
-      ctx.fillRect(e.x,e.y,4,4);
-      if(Math.abs(e.x-player.x)<10&&Math.abs(e.y-player.y)<10){
-        player.hp-=5;enemy.splice(i,1);
+    enemy.forEach((e, i) => {
+      e.y += 4;
+      ctx.fillRect(e.x, e.y, 4, 4);
+      if(Math.abs(e.x - player.x) < 10 && Math.abs(e.y - player.y) < 10){
+        player.hp -= 5;
+        enemy.splice(i, 1);
       }
     });
 
-    if(player.hp<=0){
-      voice.textContent="Again.";
-      running=false;
-      setTimeout(startBoss,1000);
+    if(player.hp <= 0){
+      game = false;
+      voice.textContent = "Again.";
+      setTimeout(() => startBoss(), 1000);
+      return;
     }
 
-    if(boss.hp<=0){
-      voice.textContent="...you win.";
-      running=false;
-      setTimeout(showMain,1200);
+    if(boss.hp <= 0){
+      game = false;
+      voice.textContent = "...you win.";
+      setTimeout(() => showMain(), 1200);
+      return;
     }
   }
 
@@ -248,35 +388,38 @@ function loop(){
 }
 loop();
 
-/* ===== MAIN ===== */
-const bg=document.getElementById("bg");
-const title=document.getElementById("title");
-const btn=document.getElementById("openBtn");
-const letter=document.getElementById("birthdayLetter");
+/* ======================
+   MAIN
+====================== */
+const bg = document.getElementById("bg");
+const title = document.getElementById("title");
+const btn = document.getElementById("openBtn");
+const letter = document.getElementById("birthdayLetter");
 
 function showMain(){
-  bossDiv.style.display="none";
-  bg.style.display="block";
-  title.style.display="block";
-  btn.style.display="inline-block";
+  bossDiv.style.display = "none";
+  bg.style.display = "block";
+  title.style.display = "block";
+  btn.style.display = "inline-block";
 }
 
-btn.onclick=()=>{
-  btn.style.display="none";
-  letter.style.display="block";
+btn.onclick = () => {
+  btn.style.display = "none";
+  letter.style.display = "block";
 
-  document.querySelectorAll(".fade-line").forEach((el,i)=>{
-    setTimeout(()=>{
-      el.style.opacity=1;
-      el.style.transform="translateY(0)";
-    },i*200);
+  document.querySelectorAll(".fade-line").forEach((el, i) => {
+    setTimeout(() => {
+      el.style.opacity = 1;
+      el.style.transform = "translateY(0)";
+    }, i * 200);
   });
 };
 
 /* start */
-newSeq();
-startRound();
-
+window.addEventListener("load", () => {
+  pickSequence();
+  startRound();
+});
 </script>
 </body>
 </html>
