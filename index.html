@@ -223,65 +223,81 @@ I can’t promise the world, but I can promise this: my heart is yours, in full,
 
 <script>
 
-/* ================= MEMORY ================= */
-const phrases=[
-"Chaos and fire dance in the night",
-"Silence flows under the moon",
-"Shadows whisper softly",
-"We met by the broken clock",
-"Stars kept one secret",
-"The clockhands bled at dawn"
+/* ================= MEMORY (FIXED + UNBREAKABLE) ================= */
+
+const phrases = [
+  "Chaos and fire dance in the night",
+  "Silence flows under the moon",
+  "Shadows whisper softly",
+  "We met by the broken clock",
+  "Stars kept one secret",
+  "The clockhands bled at dawn"
 ];
 
-let seq=[], round=0;
+let seq = [];
+let round = 0;
 
-const text=document.getElementById("memoryText");
-const choices=document.getElementById("choices");
-const minigame=document.getElementById("minigame");
+const text = document.getElementById("memoryText");
+const choices = document.getElementById("memoryChoices");
+const minigame = document.getElementById("minigame");
 
-function startGame(){
-  seq=[...phrases].sort(()=>Math.random()-0.5).slice(0,3);
-  round=0;
-  next();
+function startGame() {
+  seq = [...phrases].sort(() => Math.random() - 0.5).slice(0, 3);
+  round = 0;
+  runRound();
 }
 
-function next(){
-  const p=seq[round];
-  text.textContent="Get ready...";
+function runRound() {
+  if (!seq.length || round >= seq.length) {
+    startBoss();
+    return;
+  }
 
-  setTimeout(()=>{
-    text.textContent=p;
+  const phrase = seq[round];
 
-    setTimeout(()=>{
-      showChoices(p);
-    },1200);
+  choices.innerHTML = "";
+  text.textContent = "Get ready...";
 
-  },500);
+  // SAFE DELAY (no nested timeouts stacking forever)
+  setTimeout(() => {
+    text.textContent = phrase;
+
+    setTimeout(() => {
+      text.textContent = "Pick it";
+      showChoices(phrase);
+    }, 1200);
+
+  }, 700);
 }
 
-function showChoices(correct){
-  choices.innerHTML="";
-  const wrong=phrases.filter(x=>x!==correct);
-  const opts=[correct,wrong[0],wrong[1]].sort(()=>Math.random()-0.5);
+function showChoices(correct) {
+  choices.innerHTML = "";
 
-  opts.forEach(o=>{
-    let b=document.createElement("button");
-    b.className="opt-btn";
-    b.textContent=o;
-    b.onclick=()=>pick(o,correct);
+  const wrong = phrases.filter(p => p !== correct);
+  const opts = [correct, wrong[0], wrong[1]].sort(() => Math.random() - 0.5);
+
+  opts.forEach(o => {
+    const b = document.createElement("button");
+    b.className = "opt-btn";
+    b.textContent = o;
+
+    b.onclick = () => {
+      if (o === seq[round]) {
+        round++;
+        runRound();
+      } else {
+        startGame(); // restart clean
+      }
+    };
+
     choices.appendChild(b);
   });
 }
 
-function pick(o,c){
-  if(o===c){
-    round++;
-    if(round>=3) startBoss();
-    else next();
-  } else {
-    startGame();
-  }
-}
+/* START SAFELY AFTER DOM LOAD */
+window.addEventListener("load", () => {
+  startGame();
+});
 
 /* ================= BOSS ================= */
 const canvas=document.getElementById("bossCanvas");
