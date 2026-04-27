@@ -8,24 +8,15 @@
 
 <style>
 html,body{
-  height:100%;
-  margin:0;
-  background:#000;
-  color:#ff1a1a;
-  font-family:'UnifrakturCook',cursive;
-  text-align:center;
-  overflow:hidden;
+  height:100%; margin:0; background:#000; color:#ff1a1a;
+  font-family:'UnifrakturCook',cursive; text-align:center; overflow:hidden;
 }
 
-/* ===== minigame ===== */
+/* MINIGAME */
 #minigame{
-  position:fixed;
-  inset:0;
-  z-index:30;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
+  position:fixed; inset:0; z-index:30;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
   gap:18px;
   background:linear-gradient(#000,#120000);
 }
@@ -34,131 +25,62 @@ html,body{
   color:#ff8b8b;
   font-family:'IM Fell English',serif;
   font-size:20px;
-  background:rgba(30,0,0,0.3);
-  padding:12px 18px;
-  border-radius:8px;
-  border:1px solid rgba(255,40,40,0.15);
-  backdrop-filter: blur(4px);
-  opacity:1;
-  transition:opacity 0.3s ease, transform 0.3s ease;
 }
 
-.options{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  justify-content:center;
-  max-width:900px;
-}
+.options{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
 
 .opt-btn{
   background:#000;
   color:#ffbdbd;
   border:2px solid #7a0b0b;
-  padding:10px 14px;
+  padding:10px;
   cursor:pointer;
-  font-family:'IM Fell English',serif;
-  transition:transform .12s, background .12s;
 }
 
-.opt-btn:hover{
-  transform:translateY(-4px);
-  background:#ff2a2a;
-  color:#080808;
-}
+.opt-btn:hover{background:#ff2a2a;color:#000;}
 
-/* ===== boss ===== */
+/* BOSS */
 #bossContainer{
   display:none;
   position:fixed;
   inset:0;
   background:#000;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
-  flex-direction:column;
-  z-index:25;
 }
 
-#bossCanvas{
-  border:2px solid red;
-  background:#000;
-}
+#bossCanvas{border:2px solid red;}
 
-#bossVoice{
-  color:#ff9999;
-  height:24px;
-  margin-bottom:10px;
-  font-family:'IM Fell English',serif;
-}
+#bossVoice{color:#ff9999;height:24px;margin-bottom:10px;}
 
-/* ===== main ===== */
-.bg{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:#1a0000;
-  z-index:0;
-}
+/* MAIN */
+.bg{display:none;position:fixed;inset:0;background:#1a0000;}
 
-h1{
-  display:none;
-  position:relative;
-  z-index:2;
-}
-
-.button{
-  display:none;
-  padding:12px;
-  margin-top:20px;
-  position:relative;
-  z-index:2;
-  background:#000;
-  color:#ff2a2a;
-  border:2px solid #ff2a2a;
-  cursor:pointer;
-}
-
-.letter{
-  display:none;
-  margin:40px auto;
-  width:80%;
-  color:white;
-  position:relative;
-  z-index:2;
-  font-family:'IM Fell English',serif;
-  line-height:1.7;
-}
-
-.fade-line{
-  opacity:0;
-  transform:translateY(10px);
-  transition:0.6s;
-  display:block;
-}
+h1{display:none;}
+.button{display:none;margin-top:20px;}
+.letter{display:none;margin:40px auto;width:80%;color:white;}
+.fade-line{opacity:0;transform:translateY(10px);transition:0.6s;display:block;}
 </style>
 </head>
 
 <body>
 
-<!-- MINIGAME -->
 <div id="minigame">
   <div id="memoryText">Get ready...</div>
   <div id="progress"></div>
   <div id="memoryChoices" class="options"></div>
 </div>
 
-<!-- BOSS -->
 <div id="bossContainer">
   <div id="bossVoice"></div>
   <canvas id="bossCanvas" width="500" height="600"></canvas>
 </div>
 
-<!-- MAIN -->
 <div class="bg" id="bg"></div>
 <h1 id="title">HAPPY BIRTHDAY !!</h1>
 <button id="openBtn" class="button">Open</button>
 
-<!-- LETTER (UNCHANGED) -->
 <div class="letter" id="birthdayLetter">
   <h2 class="fade-line">To My Forever,</h2>
   <span class="fade-line">Dear Vlad!</span> 
@@ -172,254 +94,179 @@ h1{
 </div>
 
 <script>
-/* ======================
-   MEMORY GAME (FIXED)
-====================== */
+/* DEBUG */
+window.onerror = e => console.log("ERROR:", e);
 
-const allPhrases = [
-  "Chaos and fire dance in the night",
-  "Silence flows under the moon",
-  "Shadows whisper softly",
-  "We met by the broken clock",
-  "Stars kept one secret",
-  "The clockhands bled at dawn"
+/* MEMORY GAME */
+const phrases=[
+"Chaos and fire dance in the night",
+"Silence flows under the moon",
+"Shadows whisper softly",
+"We met by the broken clock",
+"Stars kept one secret",
+"The clockhands bled at dawn"
 ];
 
-const rounds = 3;
-const revealTime = 2000;
+let seq=[], round=0;
+const text=document.getElementById("memoryText");
+const choicesDiv=document.getElementById("memoryChoices");
+const progress=document.getElementById("progress");
 
-let sequence = [];
-let currentRound = 0;
-let roundTimer1 = null;
-let roundTimer2 = null;
-
-const memoryText = document.getElementById("memoryText");
-const memoryChoices = document.getElementById("memoryChoices");
-const progress = document.getElementById("progress");
-const minigame = document.getElementById("minigame");
-
-function pickSequence(){
-  sequence = [];
-  const pool = [...allPhrases];
-
-  for(let i=0;i<rounds;i++){
-    const idx = Math.floor(Math.random() * pool.length);
-    sequence.push(pool.splice(idx, 1)[0]);
-  }
-
-  currentRound = 0;
+function pick(){
+  seq=[...phrases].sort(()=>Math.random()-0.5).slice(0,3);
+  round=0;
 }
 
 function startRound(){
-  clearTimeout(roundTimer1);
-  clearTimeout(roundTimer2);
+  console.log("ROUND START");
 
-  if(!sequence.length) pickSequence();
+  const phrase=seq[round];
+  progress.textContent=`Round ${round+1}/3`;
+  choicesDiv.innerHTML="";
+  text.textContent="Get ready...";
 
-  const phrase = sequence[currentRound];
-  if(!phrase) {
-    pickSequence();
-    return startRound();
-  }
+  setTimeout(()=>{
+    text.textContent=phrase;
 
-  progress.textContent = `Round ${currentRound + 1} / ${rounds}`;
-  memoryChoices.innerHTML = "";
-  memoryText.textContent = "Get ready...";
+    setTimeout(()=>{
+      showChoices(phrase);
+    },1500);
 
-  requestAnimationFrame(() => {
-    roundTimer1 = setTimeout(() => {
-      memoryText.textContent = `Remember this: "${phrase}"`;
-
-      roundTimer2 = setTimeout(() => {
-        memoryText.textContent = "Pick it";
-        showChoices(phrase);
-      }, revealTime);
-
-    }, 500);
-  });
+  },500);
 }
 
 function showChoices(correct){
-  memoryChoices.innerHTML = "";
+  text.textContent="Pick it";
 
-  const wrong = allPhrases.filter(x => x !== correct);
-  wrong.sort(() => Math.random() - 0.5);
+  const wrong=phrases.filter(p=>p!==correct).sort(()=>Math.random()-0.5);
+  const opts=[correct,wrong[0],wrong[1]].sort(()=>Math.random()-0.5);
 
-  const choices = [correct, wrong[0], wrong[1]];
-  choices.sort(() => Math.random() - 0.5);
-
-  choices.forEach(c => {
-    const b = document.createElement("button");
-    b.className = "opt-btn";
-    b.textContent = c;
-    b.onclick = () => handle(c);
-    memoryChoices.appendChild(b);
+  opts.forEach(o=>{
+    const b=document.createElement("button");
+    b.className="opt-btn";
+    b.textContent=o;
+    b.onclick=()=>select(o);
+    choicesDiv.appendChild(b);
   });
 }
 
-function handle(choice){
-  if(choice === sequence[currentRound]){
-    currentRound++;
-    if(currentRound >= rounds){
+function select(o){
+  if(o===seq[round]){
+    round++;
+    if(round>=3){
       startBoss();
-    }else{
-      setTimeout(startRound, 500);
-    }
-  }else{
-    pickSequence();
+    } else startRound();
+  } else {
+    pick();
     startRound();
   }
 }
 
-/* ======================
-   BOSS
-====================== */
-const canvas = document.getElementById("bossCanvas");
-const ctx = canvas.getContext("2d");
-const bossDiv = document.getElementById("bossContainer");
-const voice = document.getElementById("bossVoice");
+/* BOSS */
+const canvas=document.getElementById("bossCanvas");
+const ctx=canvas.getContext("2d");
+const bossDiv=document.getElementById("bossContainer");
+const voice=document.getElementById("bossVoice");
 
-let player, boss, bullets = [], enemy = [], keys = {};
-let game = false;
+let p,b,bullets=[],enemy=[],keys={},game=false;
 
-function say(t, d = 1200){
-  voice.textContent = t;
-  game = false;
-  setTimeout(() => {
-    voice.textContent = "";
-    game = true;
-    loop();
-  }, d);
-}
+document.addEventListener("keydown",e=>keys[e.key]=true);
+document.addEventListener("keyup",e=>keys[e.key]=false);
 
-document.addEventListener("keydown", e => {
-  keys[e.key] = true;
-
-  if(e.key.toLowerCase() === "f" && game){
-    enemy = [];
-    say("Parry.");
-  }
-});
-
-document.addEventListener("keyup", e => keys[e.key] = false);
-
-canvas.addEventListener("click", () => {
-  if(game){
-    bullets.push({x: player.x, y: player.y});
-  }
-});
+canvas.onclick=()=>{
+  if(game) bullets.push({x:p.x,y:p.y});
+};
 
 function startBoss(){
-  minigame.style.display = "none";
-  bossDiv.style.display = "flex";
+  document.getElementById("minigame").style.display="none";
+  bossDiv.style.display="flex";
 
-  player = { x: 250, y: 500, hp: 100 };
-  boss = { x: 250, y: 100, hp: 100 };
+  p={x:250,y:500,hp:100};
+  b={x:250,y:100,hp:100};
 
-  bullets = [];
-  enemy = [];
-  keys = {};
-
-  game = true;
-
-  voice.textContent = "You remembered.";
-  setTimeout(() => voice.textContent = "", 1000);
+  bullets=[];enemy=[];keys={};
+  game=true;
 
   loop();
 }
 
-setInterval(() => {
-  if(game) enemy.push({x: boss.x, y: boss.y});
-}, 700);
+setInterval(()=>{if(game)enemy.push({x:b.x,y:b.y});},800);
 
 function loop(){
-  ctx.clearRect(0, 0, 500, 600);
+  ctx.clearRect(0,0,500,600);
 
   if(game){
-    if(keys["a"] || keys["ArrowLeft"]) player.x -= 4;
-    if(keys["d"] || keys["ArrowRight"]) player.x += 4;
-    if(keys["w"] || keys["ArrowUp"]) player.y -= 4;
-    if(keys["s"] || keys["ArrowDown"]) player.y += 4;
+    if(keys["a"]||keys["ArrowLeft"])p.x-=4;
+    if(keys["d"]||keys["ArrowRight"])p.x+=4;
+    if(keys["w"]||keys["ArrowUp"])p.y-=4;
+    if(keys["s"]||keys["ArrowDown"])p.y+=4;
 
-    player.x = Math.max(0, Math.min(490, player.x));
-    player.y = Math.max(0, Math.min(590, player.y));
+    ctx.fillRect(p.x,p.y,10,10);
+    ctx.fillText("♡",b.x,b.y);
 
-    ctx.fillStyle = "#ff4d4d";
-    ctx.fillRect(player.x, player.y, 10, 10);
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "28px serif";
-    ctx.fillText("♡", boss.x, boss.y);
-
-    bullets.forEach((b, i) => {
-      b.y -= 6;
-      ctx.fillRect(b.x, b.y, 3, 6);
-      if(Math.abs(b.x - boss.x) < 20 && Math.abs(b.y - boss.y) < 20){
-        boss.hp -= 2;
-        bullets.splice(i, 1);
+    bullets.forEach((x,i)=>{
+      x.y-=5;
+      ctx.fillRect(x.x,x.y,3,6);
+      if(Math.abs(x.x-b.x)<20&&Math.abs(x.y-b.y)<20){
+        b.hp-=2; bullets.splice(i,1);
       }
     });
 
-    enemy.forEach((e, i) => {
-      e.y += 4;
-      ctx.fillRect(e.x, e.y, 4, 4);
-      if(Math.abs(e.x - player.x) < 10 && Math.abs(e.y - player.y) < 10){
-        player.hp -= 5;
-        enemy.splice(i, 1);
+    enemy.forEach((x,i)=>{
+      x.y+=4;
+      ctx.fillRect(x.x,x.y,4,4);
+      if(Math.abs(x.x-p.x)<10&&Math.abs(x.y-p.y)<10){
+        p.hp-=5; enemy.splice(i,1);
       }
     });
 
-    if(player.hp <= 0){
-      game = false;
-      voice.textContent = "Again.";
-      setTimeout(() => startBoss(), 1000);
+    if(p.hp<=0){
+      voice.textContent="Again.";
+      setTimeout(startBoss,1000);
       return;
     }
 
-    if(boss.hp <= 0){
-      game = false;
-      voice.textContent = "...you win.";
-      setTimeout(() => showMain(), 1200);
+    if(b.hp<=0){
+      voice.textContent="...you win.";
+      setTimeout(showMain,1200);
       return;
     }
   }
 
   requestAnimationFrame(loop);
 }
-loop();
 
-/* ======================
-   MAIN
-====================== */
-const bg = document.getElementById("bg");
-const title = document.getElementById("title");
-const btn = document.getElementById("openBtn");
-const letter = document.getElementById("birthdayLetter");
+/* MAIN */
+const bg=document.getElementById("bg");
+const title=document.getElementById("title");
+const btn=document.getElementById("openBtn");
+const letter=document.getElementById("birthdayLetter");
 
 function showMain(){
-  bossDiv.style.display = "none";
-  bg.style.display = "block";
-  title.style.display = "block";
-  btn.style.display = "inline-block";
+  bossDiv.style.display="none";
+  bg.style.display="block";
+  title.style.display="block";
+  btn.style.display="block";
 }
 
-btn.onclick = () => {
-  btn.style.display = "none";
-  letter.style.display = "block";
+btn.onclick=()=>{
+  btn.style.display="none";
+  letter.style.display="block";
 
-  document.querySelectorAll(".fade-line").forEach((el, i) => {
-    setTimeout(() => {
-      el.style.opacity = 1;
-      el.style.transform = "translateY(0)";
-    }, i * 200);
+  document.querySelectorAll(".fade-line").forEach((el,i)=>{
+    setTimeout(()=>{
+      el.style.opacity=1;
+      el.style.transform="translateY(0)";
+    },i*200);
   });
 };
 
-/* start */
-window.addEventListener("load", () => {
-  pickSequence();
+/* START */
+document.addEventListener("DOMContentLoaded",()=>{
+  pick();
   startRound();
 });
 </script>
+
 </body>
 </html>
