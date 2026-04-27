@@ -17,10 +17,20 @@ html,body{
   overflow:hidden;
 }
 
-/* ===== Z-LAYERS FIX ===== */
+/* ===== LAYERS FIX ===== */
 .bg{position:fixed;inset:0;z-index:0;display:none;}
-.heart-wrap{z-index:2;}
-#title,#openBtn,.letter{position:relative;z-index:5;}
+
+.heart-wrap{
+  position:fixed;
+  left:50%;
+  top:45%;
+  transform:translate(-50%,-50%);
+  display:none;
+  animation:beat 1.2s infinite;
+  z-index:2;
+}
+
+#title,#openBtn,#birthdayLetter{position:relative;z-index:10;}
 
 /* ===== MINIGAME ===== */
 #minigame{
@@ -78,14 +88,6 @@ html,body{
 }
 
 /* ===== HEART ===== */
-.heart-wrap{
-  position:fixed;
-  left:50%;
-  top:45%;
-  transform:translate(-50%,-50%);
-  display:none;
-  animation:beat 1.2s infinite;
-}
 .heart-char{
   font-size:7rem;
   color:#ff1a1a;
@@ -98,16 +100,42 @@ html,body{
   100%{transform:translate(-50%,-50%) scale(1);}
 }
 
-/* ===== MAIN ===== */
-h1{display:none;}
+/* ===== BUTTON ===== */
 .button{display:none;margin-top:20px;}
 
+/* ===== LETTER (UPGRADED FULL VERSION) ===== */
 .letter{
   display:none;
   margin:40px auto;
-  width:80%;
+  width:min(900px,85%);
+  padding:38px;
+
   font-family:'IM Fell English',serif;
-  color:white;
+  color:#fff6e6;
+  line-height:1.75;
+  font-size:18px;
+
+  background:rgba(30,0,0,0.55);
+  border:2px solid rgba(255,60,60,0.25);
+
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+
+  box-shadow:
+    0 0 40px rgba(255,0,0,0.15),
+    inset 0 0 40px rgba(255,40,40,0.08);
+
+  border-radius:14px;
+
+  transform:rotate(-0.4deg);
+
+  animation:letterGlow 4s ease-in-out infinite;
+}
+
+@keyframes letterGlow{
+  0%{box-shadow:0 0 25px rgba(255,0,0,0.10), inset 0 0 40px rgba(255,40,40,0.06);}
+  50%{box-shadow:0 0 45px rgba(255,0,0,0.20), inset 0 0 60px rgba(255,40,40,0.10);}
+  100%{box-shadow:0 0 25px rgba(255,0,0,0.10), inset 0 0 40px rgba(255,40,40,0.06);}
 }
 
 .fade-line{
@@ -144,7 +172,7 @@ h1{display:none;}
 <h1 id="title">HAPPY BIRTHDAY !!</h1>
 <button id="openBtn" class="button">Open</button>
 
-<!-- LETTER (UNCHANGED) -->
+<!-- LETTER (UNCHANGED CONTENT) -->
 <div class="letter" id="birthdayLetter">
   <h2 class="fade-line">To My Forever,</h2>
   <span class="fade-line">Dear Vlad!</span> 
@@ -193,12 +221,7 @@ function startRound(){
 
   setTimeout(()=>{
     text.textContent=phrase;
-
-    setTimeout(()=>{
-      text.textContent="Pick it";
-      showChoices(phrase);
-    },1200);
-
+    setTimeout(()=>showChoices(phrase),1200);
   },500);
 }
 
@@ -319,20 +342,27 @@ function loop(){
   requestAnimationFrame(loop);
 }
 
-/* ===== FIXED END TRANSITION ===== */
+/* ===== FINAL TRANSITION FIXED ===== */
 function showMain(){
   bossDiv.style.display="none";
-  bg.style.display="block";
+  document.getElementById("bg").style.display="block";
   heart.style.display="block";
   document.getElementById("title").style.display="block";
   document.getElementById("openBtn").style.display="block";
 }
 
-/* ===== LETTER ===== */
+/* ===== LETTER FIXED OPEN ===== */
 document.getElementById("openBtn").onclick=()=>{
-  document.getElementById("birthdayLetter").style.display="block";
+  const letter=document.getElementById("birthdayLetter");
+
+  letter.style.display="block";
+  letter.scrollIntoView({behavior:"smooth",block:"center"});
+
   document.querySelectorAll(".fade-line").forEach((el,i)=>{
-    setTimeout(()=>{el.style.opacity=1;el.style.transform="translateY(0)";},i*200);
+    setTimeout(()=>{
+      el.style.opacity=1;
+      el.style.transform="translateY(0)";
+    },i*180);
   });
 };
 
