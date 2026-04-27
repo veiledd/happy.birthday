@@ -7,261 +7,373 @@
 <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=IM+Fell+English:wght@400&display=swap" rel="stylesheet">
 
 <style>
-html,body{
-  height:100%;
-  margin:0;
-  background:#000;
-  color:#ff1a1a;
-  font-family:'UnifrakturCook',cursive;
-  text-align:center;
-  overflow:hidden;
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #000;
+  font-family: 'UnifrakturCook', cursive;
+  color: #ff1a1a;
+  text-align: center;
 }
 
-/* ===== BACKGROUND ===== */
-.bg{
-  position:fixed;
-  inset:0;
-  display:none;
-  background:radial-gradient(circle at center,#6b0000,#120000,#000);
-  z-index:0;
+/* ================= HEART BACKGROUND ================= */
+.heart-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
 }
 
-/* ===== HEART ===== */
-.heart-wrap{
-  position:fixed;
-  left:50%;
-  top:45%;
-  transform:translate(-50%,-50%);
-  display:none;
-  animation:beat 1.2s infinite;
-  z-index:2;
+.heart {
+  width: 200px;
+  height: 180px;
+  background: #ff1a1a;
+  position: relative;
+  transform: rotate(-45deg);
+  animation: beat 1.2s infinite;
 }
 
-.heart-char{
-  font-size:7rem;
-  color:#ff1a1a;
-  text-shadow:0 0 25px #ff0000;
+.heart::before,
+.heart::after {
+  content: "";
+  position: absolute;
+  width: 200px;
+  height: 180px;
+  background: #ff1a1a;
+  border-radius: 50%;
 }
 
-@keyframes beat{
-  0%{transform:translate(-50%,-50%) scale(1);}
-  50%{transform:translate(-50%,-50%) scale(1.15);}
-  100%{transform:translate(-50%,-50%) scale(1);}
+.heart::before { top: -100px; left: 0; }
+.heart::after { left: 100px; top: 0; }
+
+@keyframes beat {
+  0% { transform: rotate(-45deg) scale(1); }
+  50% { transform: rotate(-45deg) scale(1.1); }
+  100% { transform: rotate(-45deg) scale(1); }
 }
 
-/* ===== OPEN BUTTON (CENTER BEFORE CLICK) ===== */
-#openBtn{
-  display:none;
-
-  position:fixed;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-
-  padding:16px 44px;
-
-  font-family:'IM Fell English',serif;
-  font-size:20px;
-  letter-spacing:3px;
-
-  color:#ff1a1a;
-
-  background:rgba(20,0,0,0.35);
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
-
-  border:1px solid rgba(255,0,0,0.4);
-
-  cursor:pointer;
-  z-index:50;
-
-  transition:0.4s ease;
+/* ================= MINIGAME ================= */
+#minigame {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(#000,#120000);
 }
 
-#openBtn:hover{
-  background:rgba(255,0,0,0.25);
-  transform:translate(-50%,-50%) scale(1.05);
+#memoryText { margin-bottom: 10px; }
+
+.options { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.opt-btn {
+  padding: 10px;
+  background: black;
+  color: #ffbdbd;
+  border: 2px solid #7a0b0b;
+  cursor: pointer;
 }
 
-/* AFTER CLICK → MOVE TO TOP */
-#openBtn.opened{
-  top:20px;
-  transform:translateX(-50%);
-  font-size:16px;
-  padding:10px 24px;
+/* ================= BOSS ================= */
+#bossContainer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(#1a0000,#000);
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 40;
 }
 
-/* ===== LETTER (NOW LONGER / SCROLLABLE PARCHMENT FEEL) ===== */
-.letter{
-  display:none;
-  margin:110px auto 60px auto;
+#bossCanvas { border: 2px solid #7a0b0b; }
+#bossUI { color: white; font-family: serif; margin-bottom: 10px; }
 
-  width:min(900px,85%);
-
-  min-height:75vh;      /* 💡 makes it tall */
-  max-height:80vh;
-  overflow-y:auto;
-
-  padding:40px;
-
-  line-height:1.7;
-  font-size:18px;
-
-  font-family:'IM Fell English',serif;
-  color:#fff6e6;
-
-  background:rgba(42,0,0,0.78);
-  border:3px solid rgba(122,11,11,0.7);
-
-  box-shadow:
-    0 0 30px rgba(0,0,0,0.6),
-    inset 0 0 30px rgba(120,10,10,0.25);
-
-  backdrop-filter:blur(6px);
-
-  position:relative;
-  z-index:10;
+/* ================= MAIN UI ================= */
+#main {
+  display: none;
+  position: relative;
+  z-index: 10;
 }
 
-.fade-line{
-  opacity:0;
-  transform:translateY(10px);
-  transition:.7s ease;
-  display:block;
+/* CENTER OPEN BUTTON OVERLAY */
+#openOverlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.4);
+  z-index: 20;
 }
 
-/* ===== MINIGAME ===== */
-#minigame{
-  position:fixed;
-  inset:0;
-  z-index:30;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:18px;
-  background:linear-gradient(#000,#120000);
+.button {
+  padding: 16px 30px;
+  font-size: 18px;
+  background: rgba(0,0,0,0.6);
+  border: 2px solid #ff2a2a;
+  color: #ff2a2a;
+  cursor: pointer;
 }
 
-#memoryText{
-  color:#ff8b8b;
-  font-family:'IM Fell English',serif;
-  font-size:20px;
+.button:hover {
+  background: #ff2a2a;
+  color: black;
 }
 
-.options{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
-
-.opt-btn{
-  background:#000;
-  color:#ffbdbd;
-  border:2px solid #7a0b0b;
-  padding:10px;
-  cursor:pointer;
+/* after open */
+.opened #openOverlay {
+  position: relative;
+  display: block;
+  backdrop-filter: none;
+  background: transparent;
+  margin-top: 20px;
 }
 
-.opt-btn:hover{
-  background:#ff2a2a;
-  color:#000;
+/* ================= LETTER (UNCHANGED EXACTLY) ================= */
+.letter {
+  display: none;
+  margin: 40px auto;
+  width: min(900px,86%);
+  padding: 36px;
+  line-height: 1.7;
+  font-size: 18px;
+  font-family: 'IM Fell English', serif;
+  color: #fff6e6;
+  background: linear-gradient(180deg,#2a0000,#1b0000);
+  border: 3px solid #b80f0f;
+  box-shadow: inset 0 0 40px rgba(180,10,10,0.3);
+  transform: rotate(-0.6deg);
 }
 
-/* ===== BOSS ===== */
-#bossContainer{
-  display:none;
-  position:fixed;
-  inset:0;
-  z-index:20;
-  background:radial-gradient(#1a0000,#000);
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
+/* ================= TITLE ================= */
+h1 {
+  display: none;
+  margin-top: 8vh;
 }
 
-#bossCanvas{border:2px solid #7a0b0b;}
-
-#bossVoice{
-  color:#ff9b9b;
-  height:26px;
-  margin-bottom:10px;
-  font-family:'IM Fell English',serif;
-}
+/* ================= PROGRESS ================= */
+#progress { color:#ffb3b3; }
 </style>
 </head>
 
 <body>
 
+<!-- HEART -->
+<div class="heart-bg" id="heartBg">
+  <div class="heart"></div>
+</div>
+
 <!-- MINIGAME -->
 <div id="minigame">
   <div id="memoryText">Get ready...</div>
-  <div id="memoryChoices" class="options"></div>
+  <div id="progress"></div>
+  <div class="options" id="choices"></div>
 </div>
 
 <!-- BOSS -->
 <div id="bossContainer">
-  <div id="bossVoice"></div>
+  <div id="bossUI"></div>
   <canvas id="bossCanvas" width="500" height="600"></canvas>
 </div>
 
-<!-- BACKGROUND + HEART -->
-<div class="bg" id="bg"></div>
-
-<div class="heart-wrap" id="heartWrap">
-  <div class="heart-char">♡</div>
-</div>
+<!-- MAIN -->
+<div id="main">
 
 <h1 id="title">HAPPY BIRTHDAY !!</h1>
-<button id="openBtn">OPEN</button>
+
+<!-- OPEN BUTTON OVERLAY -->
+<div id="openOverlay">
+  <button class="button" id="openBtn">!! Open Your Letter</button>
+</div>
 
 <!-- LETTER (UNCHANGED CONTENT) -->
-<div class="letter" id="birthdayLetter">
-  <h2 class="fade-line">To My Forever,</h2>
-  <span class="fade-line">Dear Vlad!</span> 
-  <span class="fade-line">I’m 555 and you’re my 666 perfect and completely mine. Even from miles away, you cut through the noise like a pair of scissors, sharp and precise, leaving marks that only I can see. Every time I think of you, it feels like a song shaking the world, and somehow, in the middle of all this chaos, I find peace knowing you exist.</span>
-  <span class="fade-line">I keep replaying that night we met in my head. It was awkward!!!! It was strange. It was ours. Time felt softer then, like it bent around us just enough to let something begin. I remember how interesting you were and and still are obvly :sob: I want a thousand more nights like that. Even if they’re through screens and late calls where the world fades and it’s just us.</span>
-  <span class="fade-line">You feel like a pulse I follow without thinking. Like a fire I don’t want to escape. Even from a distance, you make everything sharper, brighter, more alive.</span>
-  <span class="fade-line">I love the small things about <em>you</em> the way your words linger, the way your presence stays long after we stop talking. You are fire and shadow, chaos and calm! and somehow, even through screens, you make me feel seen..</span>
-  <span class="fade-line">I can’t promise you the world. But I can promise you this ,, my heart is yours. Fully. In fragments. In every quiet space between conversations.</span>
-  <span class="fade-line">I’ll be here. Steady. Sharp. Yours.</span>
-  <span class="fade-line">— Yours Truly</span>
+<div class="letter" id="letter">
+
+<h2>To My Forever! </h2>
+
+<p> </em> Dear Vlad!</em>
+  I’m 555 and you’re my 666, perfectly chaotic and completely mine. Even from miles away, you cut through the noise like a pair of scissors, sharp and precise, leaving marks that only I can see. Every time I think of you, it feels like a song shaking the world, and somehow, in the middle of all this chaos, I find peace knowing you exist.
+</p>
+
+<p>
+I keep replaying that night we met in my head!! it was a bit awkward but still really fun!! i loved how intresting you were, and still are. I can still feel the way time warped around us, I hope we get a thousand more nights like that even if it’s through messages or calls where the world fades and it’s just us, pulsing together like a drumbeat too loud to ignore. You are the pulse I follow, the fire I can’t escape, and somehow, I never want to. Even across the distance, you make everything sharper, brighter, and more alive than I ever imagined it could be.
+</p>
+
+<p>
+I love the little things I notice about <em>you</em>., even from afar: the way your words land, the way your presence lingers in my mind long after we’ve stopped talking, the chaos and calm that seem to follow you like a shadow. You are fire and shadow, scream and silence, and somehow, even through screens and signals, <em>.you make me feel seen, understood, and untamed.</em>
+</p>
+
+<p>
+I can’t promise the world, but I can promise this: my heart is yours, in full, in fragments, and in every space you leave behind. Even when the distance feels impossible. I’ll be here—sharp, steady, and yours. And maybe one day soon, we won’t need screens or messages to reach each other. Until then, I’ll carry you in every thought, every heartbeat, every restless night.
+</p>
+
+<p>—Yours Truly</p>
+
+</div>
+
 </div>
 
 <script>
 
-/* ===== MINIGAME (simple safe version) ===== */
-const openBtn=document.getElementById("openBtn");
-const letter=document.getElementById("birthdayLetter");
+/* ================= MEMORY ================= */
+const phrases=[
+"Chaos and fire dance in the night",
+"Silence flows under the moon",
+"Shadows whisper softly",
+"We met by the broken clock",
+"Stars kept one secret",
+"The clockhands bled at dawn"
+];
 
-let clicks=0;
-let reset;
+let seq=[], round=0;
 
-openBtn.onclick=()=>{
+const text=document.getElementById("memoryText");
+const choices=document.getElementById("choices");
+const minigame=document.getElementById("minigame");
 
-  clicks++;
-  clearTimeout(reset);
-  reset=setTimeout(()=>clicks=0,1000);
+function startGame(){
+  seq=[...phrases].sort(()=>Math.random()-0.5).slice(0,3);
+  round=0;
+  next();
+}
 
-  if(clicks===3){
-    alert("STOP!! I LOVE YOU TOO!!");
-    clicks=0;
-    return;
-  }
+function next(){
+  const p=seq[round];
+  text.textContent="Get ready...";
 
-  /* move button */
-  if(!openBtn.classList.contains("opened")){
-    openBtn.classList.add("opened");
-  }
+  setTimeout(()=>{
+    text.textContent=p;
 
-  /* show letter */
-  letter.style.display="block";
-
-  document.querySelectorAll(".fade-line").forEach((el,i)=>{
     setTimeout(()=>{
-      el.style.opacity=1;
-      el.style.transform="translateY(0)";
-    },i*180);
+      showChoices(p);
+    },1200);
+
+  },500);
+}
+
+function showChoices(correct){
+  choices.innerHTML="";
+  const wrong=phrases.filter(x=>x!==correct);
+  const opts=[correct,wrong[0],wrong[1]].sort(()=>Math.random()-0.5);
+
+  opts.forEach(o=>{
+    let b=document.createElement("button");
+    b.className="opt-btn";
+    b.textContent=o;
+    b.onclick=()=>pick(o,correct);
+    choices.appendChild(b);
+  });
+}
+
+function pick(o,c){
+  if(o===c){
+    round++;
+    if(round>=3) startBoss();
+    else next();
+  } else {
+    startGame();
+  }
+}
+
+/* ================= BOSS ================= */
+const canvas=document.getElementById("bossCanvas");
+const ctx=canvas.getContext("2d");
+const bossUI=document.getElementById("bossUI");
+
+let p,b,bul=[],en=[],game=false;
+
+function startBoss(){
+  minigame.style.display="none";
+  document.getElementById("bossContainer").style.display="flex";
+
+  p={x:250,y:520,hp:100};
+  b={x:250,y:100,hp:120,dir:1};
+  game=true;
+
+  loop();
+}
+
+document.addEventListener("keydown",e=>{
+  if(!game) return;
+  if(e.key==="a") p.x-=5;
+  if(e.key==="d") p.x+=5;
+});
+
+canvas.onclick=()=>{
+  if(game) bul.push({x:p.x,y:p.y-10});
+};
+
+setInterval(()=>{
+  if(game){
+    en.push({x:b.x,y:b.y,dy:3});
+  }
+},800);
+
+function loop(){
+  if(!game) return;
+
+  ctx.clearRect(0,0,500,600);
+
+  ctx.fillStyle="red";
+  ctx.fillRect(p.x,p.y,10,10);
+
+  ctx.fillText("♡",b.x,b.y);
+
+  bul.forEach((x,i)=>{
+    x.y-=6;
+    ctx.fillRect(x.x,x.y,3,6);
+    if(Math.abs(x.x-b.x)<20) b.hp-=2;
   });
 
-  letter.scrollIntoView({behavior:"smooth",block:"start"});
+  en.forEach((x,i)=>{
+    x.y+=x.dy;
+    ctx.fillRect(x.x,x.y,4,4);
+    if(Math.abs(x.x-p.x)<10) p.hp-=5;
+  });
+
+  bossUI.textContent=`HP: ${p.hp} | Boss: ${b.hp}`;
+
+  if(b.hp<=0){
+    game=false;
+    showMain();
+  }
+
+  requestAnimationFrame(loop);
+}
+
+/* ================= MAIN ================= */
+function showMain(){
+  document.getElementById("bossContainer").style.display="none";
+  document.getElementById("main").style.display="block";
+  document.getElementById("heartBg").style.display="flex";
+  document.getElementById("title").style.display="block";
+  document.getElementById("openOverlay").style.display="flex";
+}
+
+/* ================= OPEN BUTTON ================= */
+let clicks=0;
+
+document.getElementById("openBtn").onclick=()=>{
+  clicks++;
+
+  if(clicks>6){
+    alert("STOP!! I LOVE YOU TOO!!");
+  }
+
+  document.getElementById("letter").style.display="block";
+  document.body.classList.add("opened");
+  document.getElementById("openOverlay").style.display="none";
 };
+
+startGame();
 
 </script>
 
