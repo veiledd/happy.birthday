@@ -12,7 +12,7 @@ html,body{
   font-family:'UnifrakturCook',cursive; text-align:center; overflow:hidden;
 }
 
-/* MINIGAME */
+/* ===== MINIGAME ===== */
 #minigame{
   position:fixed; inset:0; z-index:30;
   display:flex; flex-direction:column;
@@ -36,51 +36,62 @@ html,body{
   padding:10px;
   cursor:pointer;
 }
-
 .opt-btn:hover{background:#ff2a2a;color:#000;}
 
-/* BOSS */
+/* ===== BOSS ===== */
 #bossContainer{
   display:none;
   position:fixed;
   inset:0;
-  background:#000;
+  background:radial-gradient(#1a0000,#000);
   flex-direction:column;
   align-items:center;
   justify-content:center;
 }
 
-#bossCanvas{border:2px solid red;}
+#bossCanvas{border:2px solid #7a0b0b;}
+#bossVoice{
+  color:#ff9b9b;
+  height:26px;
+  margin-bottom:10px;
+  font-family:'IM Fell English',serif;
+}
 
-#bossVoice{color:#ff9999;height:24px;margin-bottom:10px;}
-
-/* MAIN */
+/* ===== MAIN ===== */
 .bg{display:none;position:fixed;inset:0;background:#1a0000;}
-
 h1{display:none;}
 .button{display:none;margin-top:20px;}
-.letter{display:none;margin:40px auto;width:80%;color:white;}
-.fade-line{opacity:0;transform:translateY(10px);transition:0.6s;display:block;}
+
+.letter{
+  display:none;margin:40px auto;width:80%;
+  font-family:'IM Fell English',serif;
+  color:white;
+}
+.fade-line{opacity:0;transform:translateY(10px);transition:.7s;display:block;}
 </style>
 </head>
 
 <body>
 
+<!-- MINIGAME -->
 <div id="minigame">
   <div id="memoryText">Get ready...</div>
   <div id="progress"></div>
   <div id="memoryChoices" class="options"></div>
 </div>
 
+<!-- BOSS -->
 <div id="bossContainer">
   <div id="bossVoice"></div>
   <canvas id="bossCanvas" width="500" height="600"></canvas>
 </div>
 
+<!-- MAIN -->
 <div class="bg" id="bg"></div>
 <h1 id="title">HAPPY BIRTHDAY !!</h1>
 <button id="openBtn" class="button">Open</button>
 
+<!-- LETTER (UNCHANGED) -->
 <div class="letter" id="birthdayLetter">
   <h2 class="fade-line">To My Forever,</h2>
   <span class="fade-line">Dear Vlad!</span> 
@@ -94,10 +105,9 @@ h1{display:none;}
 </div>
 
 <script>
-/* DEBUG */
-window.onerror = e => console.log("ERROR:", e);
+console.log("Script running");
 
-/* MEMORY GAME */
+/* ================= MEMORY GAME ================= */
 const phrases=[
 "Chaos and fire dance in the night",
 "Silence flows under the moon",
@@ -118,8 +128,6 @@ function pick(){
 }
 
 function startRound(){
-  console.log("ROUND START");
-
   const phrase=seq[round];
   progress.textContent=`Round ${round+1}/3`;
   choicesDiv.innerHTML="";
@@ -128,10 +136,7 @@ function startRound(){
   setTimeout(()=>{
     text.textContent=phrase;
 
-    setTimeout(()=>{
-      showChoices(phrase);
-    },1500);
-
+    setTimeout(()=>showChoices(phrase),1500);
   },500);
 }
 
@@ -153,90 +158,154 @@ function showChoices(correct){
 function select(o){
   if(o===seq[round]){
     round++;
-    if(round>=3){
-      startBoss();
-    } else startRound();
+    if(round>=3) startBoss();
+    else startRound();
   } else {
     pick();
     startRound();
   }
 }
 
-/* BOSS */
+/* ================= BOSS ================= */
 const canvas=document.getElementById("bossCanvas");
 const ctx=canvas.getContext("2d");
 const bossDiv=document.getElementById("bossContainer");
 const voice=document.getElementById("bossVoice");
 
 let p,b,bullets=[],enemy=[],keys={},game=false;
+let canParry=true;
 
-document.addEventListener("keydown",e=>keys[e.key]=true);
+/* INPUT */
+document.addEventListener("keydown",e=>{
+  keys[e.key]=true;
+
+  if(e.key.toLowerCase()==="f" && canParry){
+    canParry=false;
+
+    enemy = enemy.filter(b=>{
+      if(Math.abs(b.x-p.x)<40 && Math.abs(b.y-p.y)<40){
+        bullets.push({x:p.x,y:p.y,dy:-8});
+        return false;
+      }
+      return true;
+    });
+
+    say("…reflected.");
+    setTimeout(()=>canParry=true,400);
+  }
+});
+
 document.addEventListener("keyup",e=>keys[e.key]=false);
 
-canvas.onclick=()=>{
-  if(game) bullets.push({x:p.x,y:p.y});
-};
+/* ATTACK */
+canvas.addEventListener("click",()=>{
+  if(game) bullets.push({x:p.x,y:p.y,dy:-7});
+});
 
+/* DIALOGUE SYSTEM */
+function say(t,time=1600){
+  voice.textContent=t;
+  setTimeout(()=>voice.textContent="",time);
+}
+
+/* START */
 function startBoss(){
   document.getElementById("minigame").style.display="none";
   bossDiv.style.display="flex";
 
-  p={x:250,y:500,hp:100};
-  b={x:250,y:100,hp:100};
+  p={x:250,y:520,hp:100};
+  b={x:250,y:100,hp:140,dir:1};
 
   bullets=[];enemy=[];keys={};
   game=true;
 
+  say("So… you remembered.");
+
+  setTimeout(()=>say("Let’s see if you endure."),2000);
+
   loop();
 }
 
-setInterval(()=>{if(game)enemy.push({x:b.x,y:b.y});},800);
+/* ATTACK PATTERN */
+setInterval(()=>{
+  if(game){
+    enemy.push(
+      {x:b.x,y:b.y,dx:-2,dy:3},
+      {x:b.x,y:b.y,dx:0,dy:3},
+      {x:b.x,y:b.y,dx:2,dy:3}
+    );
+  }
+},900);
 
+/* LOOP */
 function loop(){
+  if(!game)return;
+
   ctx.clearRect(0,0,500,600);
 
-  if(game){
-    if(keys["a"]||keys["ArrowLeft"])p.x-=4;
-    if(keys["d"]||keys["ArrowRight"])p.x+=4;
-    if(keys["w"]||keys["ArrowUp"])p.y-=4;
-    if(keys["s"]||keys["ArrowDown"])p.y+=4;
+  /* movement */
+  if(keys["a"]||keys["ArrowLeft"])p.x-=4;
+  if(keys["d"]||keys["ArrowRight"])p.x+=4;
+  if(keys["w"]||keys["ArrowUp"])p.y-=4;
+  if(keys["s"]||keys["ArrowDown"])p.y+=4;
 
-    ctx.fillRect(p.x,p.y,10,10);
-    ctx.fillText("♡",b.x,b.y);
+  /* boss movement */
+  b.x+=b.dir*2;
+  if(b.x>460||b.x<40)b.dir*=-1;
 
-    bullets.forEach((x,i)=>{
-      x.y-=5;
-      ctx.fillRect(x.x,x.y,3,6);
-      if(Math.abs(x.x-b.x)<20&&Math.abs(x.y-b.y)<20){
-        b.hp-=2; bullets.splice(i,1);
-      }
-    });
+  /* draw */
+  ctx.fillStyle="#ff3b3b";
+  ctx.fillRect(p.x,p.y,10,10);
 
-    enemy.forEach((x,i)=>{
-      x.y+=4;
-      ctx.fillRect(x.x,x.y,4,4);
-      if(Math.abs(x.x-p.x)<10&&Math.abs(x.y-p.y)<10){
-        p.hp-=5; enemy.splice(i,1);
-      }
-    });
+  ctx.fillStyle="#fff";
+  ctx.fillText("♡",b.x,b.y);
 
-    if(p.hp<=0){
-      voice.textContent="Again.";
-      setTimeout(startBoss,1000);
-      return;
+  /* bullets */
+  bullets.forEach((x,i)=>{
+    x.y+=x.dy;
+    ctx.fillRect(x.x,x.y,3,6);
+
+    if(Math.abs(x.x-b.x)<20 && Math.abs(x.y-b.y)<20){
+      b.hp-=3;
+      bullets.splice(i,1);
+
+      if(b.hp===70) say("…you persist.");
+      if(b.hp===30) say("Why do you keep going?");
     }
+  });
 
-    if(b.hp<=0){
-      voice.textContent="...you win.";
-      setTimeout(showMain,1200);
-      return;
+  enemy.forEach((x,i)=>{
+    x.x+=x.dx; x.y+=x.dy;
+    ctx.fillRect(x.x,x.y,4,4);
+
+    if(Math.abs(x.x-p.x)<10 && Math.abs(x.y-p.y)<10){
+      p.hp-=6;
+      enemy.splice(i,1);
+      say("Careful.");
     }
+  });
+
+  ctx.fillText("HP:"+p.hp,10,20);
+  ctx.fillText("BOSS:"+b.hp,350,20);
+
+  if(p.hp<=0){
+    game=false;
+    say("…again.");
+    setTimeout(startBoss,1000);
+    return;
+  }
+
+  if(b.hp<=0){
+    game=false;
+    say("…you stayed.");
+    setTimeout(showMain,1400);
+    return;
   }
 
   requestAnimationFrame(loop);
 }
 
-/* MAIN */
+/* MAIN PAGE */
 const bg=document.getElementById("bg");
 const title=document.getElementById("title");
 const btn=document.getElementById("openBtn");
@@ -261,7 +330,7 @@ btn.onclick=()=>{
   });
 };
 
-/* START */
+/* INIT */
 document.addEventListener("DOMContentLoaded",()=>{
   pick();
   startRound();
