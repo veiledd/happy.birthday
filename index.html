@@ -8,15 +8,29 @@
 
 <style>
 html,body{
-  height:100%; margin:0; background:#000; color:#ff1a1a;
-  font-family:'UnifrakturCook',cursive; text-align:center; overflow:hidden;
+  height:100%;
+  margin:0;
+  background:#000;
+  color:#ff1a1a;
+  font-family:'UnifrakturCook',cursive;
+  text-align:center;
+  overflow:hidden;
 }
+
+/* ===== Z-LAYERS FIX ===== */
+.bg{position:fixed;inset:0;z-index:0;display:none;}
+.heart-wrap{z-index:2;}
+#title,#openBtn,.letter{position:relative;z-index:5;}
 
 /* ===== MINIGAME ===== */
 #minigame{
-  position:fixed; inset:0; z-index:30;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
+  position:fixed;
+  inset:0;
+  z-index:30;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
   gap:18px;
   background:linear-gradient(#000,#120000);
 }
@@ -27,7 +41,7 @@ html,body{
   font-size:20px;
 }
 
-.options{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
+.options{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
 
 .opt-btn{
   background:#000;
@@ -36,17 +50,18 @@ html,body{
   padding:10px;
   cursor:pointer;
 }
+.opt-btn:hover{background:#ff2a2a;color:#000;}
 
 /* ===== BOSS ===== */
 #bossContainer{
   display:none;
   position:fixed;
   inset:0;
+  z-index:20;
   background:radial-gradient(#1a0000,#000);
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  z-index:25;
 }
 
 #bossCanvas{border:2px solid #7a0b0b;}
@@ -59,11 +74,7 @@ html,body{
 
 /* ===== BACKGROUND ===== */
 .bg{
-  display:none;
-  position:fixed;
-  inset:0;
   background:radial-gradient(circle at center,#6b0000,#120000,#000);
-  z-index:0;
 }
 
 /* ===== HEART ===== */
@@ -73,10 +84,8 @@ html,body{
   top:45%;
   transform:translate(-50%,-50%);
   display:none;
-  z-index:2;
   animation:beat 1.2s infinite;
 }
-
 .heart-char{
   font-size:7rem;
   color:#ff1a1a;
@@ -85,7 +94,7 @@ html,body{
 
 @keyframes beat{
   0%{transform:translate(-50%,-50%) scale(1);}
-  50%{transform:translate(-50%,-50%) scale(1.1);}
+  50%{transform:translate(-50%,-50%) scale(1.15);}
   100%{transform:translate(-50%,-50%) scale(1);}
 }
 
@@ -93,12 +102,14 @@ html,body{
 h1{display:none;}
 .button{display:none;margin-top:20px;}
 
-/* ===== LETTER (UNCHANGED EXACTLY) ===== */
 .letter{
-  display:none;margin:40px auto;width:80%;
+  display:none;
+  margin:40px auto;
+  width:80%;
   font-family:'IM Fell English',serif;
   color:white;
 }
+
 .fade-line{
   opacity:0;
   transform:translateY(10px);
@@ -126,12 +137,14 @@ h1{display:none;}
 <!-- MAIN -->
 <div class="bg" id="bg"></div>
 
-<div class="heart-wrap" id="heartWrap"><div class="heart-char">♡</div></div>
+<div class="heart-wrap" id="heartWrap">
+  <div class="heart-char">♡</div>
+</div>
 
 <h1 id="title">HAPPY BIRTHDAY !!</h1>
 <button id="openBtn" class="button">Open</button>
 
-<!-- LETTER (UNCHANGED - DO NOT TOUCH) -->
+<!-- LETTER (UNCHANGED) -->
 <div class="letter" id="birthdayLetter">
   <h2 class="fade-line">To My Forever,</h2>
   <span class="fade-line">Dear Vlad!</span> 
@@ -146,10 +159,13 @@ h1{display:none;}
 
 <script>
 
-/* ================= SAFE STATE ================= */
-let gameMode="minigame";
+/* ===== SAFE INIT ===== */
+window.onload = () => {
+  pick();
+  startRound();
+};
 
-/* ================= MINIGAME ================= */
+/* ===== MEMORY GAME ===== */
 const phrases=[
 "Chaos and fire dance in the night",
 "Silence flows under the moon",
@@ -170,8 +186,6 @@ function pick(){
 }
 
 function startRound(){
-  if(gameMode!=="minigame") return;
-
   const phrase=seq[round];
   progress.textContent=`Round ${round+1}/3`;
   choices.innerHTML="";
@@ -185,17 +199,15 @@ function startRound(){
       showChoices(phrase);
     },1200);
 
-  },600);
+  },500);
 }
 
 function showChoices(correct){
-  choices.innerHTML="";
-  let wrong=phrases.filter(p=>p!==correct);
-
-  let opts=[correct,wrong[0],wrong[1]].sort(()=>Math.random()-0.5);
+  const wrong=phrases.filter(p=>p!==correct);
+  const opts=[correct,wrong[0],wrong[1]].sort(()=>Math.random()-0.5);
 
   opts.forEach(o=>{
-    let b=document.createElement("button");
+    const b=document.createElement("button");
     b.className="opt-btn";
     b.textContent=o;
     b.onclick=()=>select(o);
@@ -206,24 +218,27 @@ function showChoices(correct){
 function select(o){
   if(o===seq[round]){
     round++;
-    if(round>=3){
-      startBoss();
-    }else startRound();
-  }else{
+    if(round>=3) startBoss();
+    else startRound();
+  } else {
     pick();
     startRound();
   }
 }
 
-/* ================= BOSS ================= */
+/* ===== BOSS ===== */
 const canvas=document.getElementById("bossCanvas");
 const ctx=canvas.getContext("2d");
 const bossDiv=document.getElementById("bossContainer");
 const voice=document.getElementById("bossVoice");
+const heart=document.getElementById("heartWrap");
 
 let p,b,bullets=[],enemy=[],keys={},game=false;
 
-function say(t){ voice.textContent=t; setTimeout(()=>voice.textContent="",1500); }
+function say(t){
+  voice.textContent=t;
+  setTimeout(()=>voice.textContent="",1500);
+}
 
 document.addEventListener("keydown",e=>keys[e.key]=true);
 document.addEventListener("keyup",e=>keys[e.key]=false);
@@ -232,50 +247,47 @@ canvas.onclick=()=>{
   if(game) bullets.push({x:p.x,y:p.y,dy:-7});
 };
 
-setInterval(()=>{
-  if(game){
-    enemy.push({x:b.x,y:b.y,dx:-2,dy:3});
-    enemy.push({x:b.x,y:b.y,dx:0,dy:3});
-    enemy.push({x:b.x,y:b.y,dx:2,dy:3});
-  }
-},900);
-
 function startBoss(){
-  gameMode="boss";
   document.getElementById("minigame").style.display="none";
   bossDiv.style.display="flex";
 
   p={x:250,y:520,hp:100};
-  b={x:250,y:100,hp:120,dir:1};
+  b={x:250,y:100,hp:140,dir:1};
 
   bullets=[];enemy=[];keys={};
   game=true;
 
-  say("You passed.");
+  say("So… you made it.");
   loop();
 }
 
+setInterval(()=>{
+  if(game){
+    enemy.push({x:b.x,y:b.y,dx:-2,dy:3},{x:b.x,y:b.y,dx:0,dy:3},{x:b.x,y:b.y,dx:2,dy:3});
+  }
+},900);
+
 function loop(){
-  if(!game) return;
+  if(!game)return;
 
   ctx.clearRect(0,0,500,600);
 
-  if(keys["a"]) p.x-=4;
-  if(keys["d"]) p.x+=4;
-  if(keys["w"]) p.y-=4;
-  if(keys["s"]) p.y+=4;
+  if(keys["a"])p.x-=4;
+  if(keys["d"])p.x+=4;
+  if(keys["w"])p.y-=4;
+  if(keys["s"])p.y+=4;
 
   p.x=Math.max(0,Math.min(490,p.x));
   p.y=Math.max(0,Math.min(590,p.y));
 
   b.x+=b.dir*2;
-  if(b.x>460||b.x<40) b.dir*=-1;
+  if(b.x>460||b.x<40)b.dir*=-1;
 
   ctx.fillStyle="#ff3b3b";
   ctx.fillRect(p.x,p.y,10,10);
 
   ctx.fillStyle="#fff";
-  ctx.font="30px serif";
+  ctx.font="28px serif";
   ctx.fillText("♡",b.x,b.y);
 
   bullets.forEach((x,i)=>{
@@ -288,60 +300,40 @@ function loop(){
   });
 
   enemy.forEach((x,i)=>{
-    x.x+=x.dx; x.y+=x.dy;
+    x.x+=x.dx;
+    x.y+=x.dy;
     ctx.fillRect(x.x,x.y,4,4);
 
     if(Math.abs(x.x-p.x)<10&&Math.abs(x.y-p.y)<10){
       p.hp-=6;
       enemy.splice(i,1);
-      say("Careful.");
     }
   });
 
   ctx.fillText("HP:"+p.hp,10,20);
   ctx.fillText("BOSS:"+b.hp,350,20);
 
-  if(p.hp<=0){
-    say("Again.");
-    startBoss();
-    return;
-  }
-
-  if(b.hp<=0){
-    game=false;
-    say("...");
-    setTimeout(showMain,1200);
-    return;
-  }
+  if(p.hp<=0){game=false;startBoss();return;}
+  if(b.hp<=0){game=false;showMain();return;}
 
   requestAnimationFrame(loop);
 }
 
-/* ================= RESTORE MAIN ================= */
+/* ===== FIXED END TRANSITION ===== */
 function showMain(){
   bossDiv.style.display="none";
-  document.getElementById("bg").style.display="block";
+  bg.style.display="block";
+  heart.style.display="block";
   document.getElementById("title").style.display="block";
   document.getElementById("openBtn").style.display="block";
-  document.getElementById("heartWrap").style.display="block";
 }
 
-/* LETTER */
+/* ===== LETTER ===== */
 document.getElementById("openBtn").onclick=()=>{
   document.getElementById("birthdayLetter").style.display="block";
-
   document.querySelectorAll(".fade-line").forEach((el,i)=>{
-    setTimeout(()=>{
-      el.style.opacity=1;
-      el.style.transform="translateY(0)";
-    },i*200);
+    setTimeout(()=>{el.style.opacity=1;el.style.transform="translateY(0)";},i*200);
   });
-};
-
-/* INIT */
-window.onload=()=>{
-  pick();
-  startRound();
 };
 
 </script>
