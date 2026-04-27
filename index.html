@@ -17,7 +17,7 @@ html,body{
   overflow:hidden;
 }
 
-/* ===== LAYERS FIX ===== */
+/* ===== LAYERS ===== */
 .bg{position:fixed;inset:0;z-index:0;display:none;}
 
 .heart-wrap{
@@ -100,42 +100,34 @@ html,body{
   100%{transform:translate(-50%,-50%) scale(1);}
 }
 
-/* ===== BUTTON ===== */
-.button{display:none;margin-top:20px;}
+/* ===== BUTTON (clean gothic style) ===== */
+.button{
+  display:none;
+  margin-top:20px;
+  padding:14px 38px;
+  font-family:'IM Fell English',serif;
+  font-size:18px;
+  color:#ffb3b3;
+  background:rgba(20,0,0,0.6);
+  border:2px solid rgba(255,40,40,0.5);
+  cursor:pointer;
+  transition:0.25s;
+}
 
-/* ===== LETTER (UPGRADED FULL VERSION) ===== */
+.button:hover{
+  background:#ff1a1a;
+  color:#000;
+}
+
+/* ===== LETTER (UNCHANGED) ===== */
 .letter{
   display:none;
   margin:40px auto;
-  width:min(900px,85%);
-  padding:38px;
-
+  width:80%;
   font-family:'IM Fell English',serif;
-  color:#fff6e6;
-  line-height:1.75;
+  color:white;
+  line-height:1.7;
   font-size:18px;
-
-  background:rgba(30,0,0,0.55);
-  border:2px solid rgba(255,60,60,0.25);
-
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-
-  box-shadow:
-    0 0 40px rgba(255,0,0,0.15),
-    inset 0 0 40px rgba(255,40,40,0.08);
-
-  border-radius:14px;
-
-  transform:rotate(-0.4deg);
-
-  animation:letterGlow 4s ease-in-out infinite;
-}
-
-@keyframes letterGlow{
-  0%{box-shadow:0 0 25px rgba(255,0,0,0.10), inset 0 0 40px rgba(255,40,40,0.06);}
-  50%{box-shadow:0 0 45px rgba(255,0,0,0.20), inset 0 0 60px rgba(255,40,40,0.10);}
-  100%{box-shadow:0 0 25px rgba(255,0,0,0.10), inset 0 0 40px rgba(255,40,40,0.06);}
 }
 
 .fade-line{
@@ -172,7 +164,7 @@ html,body{
 <h1 id="title">HAPPY BIRTHDAY !!</h1>
 <button id="openBtn" class="button">Open</button>
 
-<!-- LETTER (UNCHANGED CONTENT) -->
+<!-- LETTER (UNCHANGED) -->
 <div class="letter" id="birthdayLetter">
   <h2 class="fade-line">To My Forever,</h2>
   <span class="fade-line">Dear Vlad!</span> 
@@ -187,13 +179,7 @@ html,body{
 
 <script>
 
-/* ===== SAFE INIT ===== */
-window.onload = () => {
-  pick();
-  startRound();
-};
-
-/* ===== MEMORY GAME ===== */
+/* ================= MEMORY GAME ================= */
 const phrases=[
 "Chaos and fire dance in the night",
 "Silence flows under the moon",
@@ -249,7 +235,7 @@ function select(o){
   }
 }
 
-/* ===== BOSS ===== */
+/* ================= BOSS ================= */
 const canvas=document.getElementById("bossCanvas");
 const ctx=canvas.getContext("2d");
 const bossDiv=document.getElementById("bossContainer");
@@ -333,16 +319,13 @@ function loop(){
     }
   });
 
-  ctx.fillText("HP:"+p.hp,10,20);
-  ctx.fillText("BOSS:"+b.hp,350,20);
-
   if(p.hp<=0){game=false;startBoss();return;}
   if(b.hp<=0){game=false;showMain();return;}
 
   requestAnimationFrame(loop);
 }
 
-/* ===== FINAL TRANSITION FIXED ===== */
+/* ================= MAIN TRANSITION ================= */
 function showMain(){
   bossDiv.style.display="none";
   document.getElementById("bg").style.display="block";
@@ -351,12 +334,27 @@ function showMain(){
   document.getElementById("openBtn").style.display="block";
 }
 
-/* ===== LETTER FIXED OPEN ===== */
-document.getElementById("openBtn").onclick=()=>{
-  const letter=document.getElementById("birthdayLetter");
+/* ================= LETTER + EASTER EGG RESTORED ================= */
+const openBtn=document.getElementById("openBtn");
+const letter=document.getElementById("birthdayLetter");
+
+let clicks=0;
+let timer=null;
+
+openBtn.onclick=()=>{
+  clicks++;
+
+  clearTimeout(timer);
+  timer=setTimeout(()=>clicks=0,1000);
+
+  /* 💖 ORIGINAL EASTER EGG */
+  if(clicks===3){
+    alert("STOP!! I LOVE YOU TOO!!");
+    clicks=0;
+    return;
+  }
 
   letter.style.display="block";
-  letter.scrollIntoView({behavior:"smooth",block:"center"});
 
   document.querySelectorAll(".fade-line").forEach((el,i)=>{
     setTimeout(()=>{
@@ -364,7 +362,15 @@ document.getElementById("openBtn").onclick=()=>{
       el.style.transform="translateY(0)";
     },i*180);
   });
+
+  letter.scrollIntoView({behavior:"smooth",block:"center"});
 };
+
+/* INIT */
+document.addEventListener("DOMContentLoaded",()=>{
+  pick();
+  startRound();
+});
 
 </script>
 
