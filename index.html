@@ -19,12 +19,6 @@ html,body{
   gap:18px; background:linear-gradient(#000,#120000);
 }
 
-#memoryText{
-  color:#ff8b8b;
-  font-family:'IM Fell English',serif;
-  font-size:20px;
-}
-
 .options{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
 
 .opt-btn{
@@ -37,7 +31,9 @@ html,body{
   display:none;
   position:fixed; inset:0;
   background:#000;
-  align-items:center; justify-content:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   flex-direction:column;
 }
 
@@ -46,7 +42,6 @@ html,body{
 
 /* ===== main ===== */
 .bg{display:none; position:fixed; inset:0; background:#1a0000;}
-
 h1{display:none;}
 .button{display:none; padding:12px; margin-top:20px;}
 
@@ -129,12 +124,10 @@ function startRound(){
 
   setTimeout(()=>{
     text.textContent=`"${p}"`;
-
     setTimeout(()=>{
       text.textContent="Pick it";
       showChoices(p);
     },1500);
-
   },500);
 }
 
@@ -162,26 +155,23 @@ function choose(c){
   }
 }
 
-/* ===== BOSS ===== */
+/* ===== BOSS (FIXED LOOP SYSTEM) ===== */
 const canvas=document.getElementById("bossCanvas");
 const ctx=canvas.getContext("2d");
 const bossDiv=document.getElementById("bossContainer");
 const voice=document.getElementById("bossVoice");
 
-let player,boss,bullets=[],enemy=[],keys={},game=false;
+let player,boss,bullets=[],enemy=[],keys={};
+let running=true;
 
-function say(t,d=1200){
-  voice.textContent=t;
-  game=false;
-  setTimeout(()=>{voice.textContent="";game=true;loop();},d);
-}
-
+/* INPUT */
 document.addEventListener("keydown",e=>{
   keys[e.key]=true;
 
   if(e.key==="f"){
-    enemy=[];
-    say("Parry.");
+    enemy=[]; // parry clears bullets
+    voice.textContent="Parry.";
+    setTimeout(()=>voice.textContent="",500);
   }
 });
 document.addEventListener("keyup",e=>keys[e.key]=false);
@@ -190,6 +180,7 @@ canvas.onclick=()=>{
   bullets.push({x:player.x,y:player.y});
 };
 
+/* START */
 function startBoss(){
   document.getElementById("minigame").style.display="none";
   bossDiv.style.display="flex";
@@ -197,67 +188,67 @@ function startBoss(){
   player={x:250,y:500,hp:100};
   boss={x:250,y:100,hp:100};
 
-  bullets=[];enemy=[];keys={};
+  bullets=[]; enemy=[]; keys={};
 
-  game=true;
+  voice.textContent="You remembered.";
+  setTimeout(()=>voice.textContent="",1000);
 
-  setTimeout(()=>say("You remembered."),500);
-  setTimeout(()=>say("Now endure."),2000);
-
-  loop();
+  running=true;
 }
 
+/* ENEMY SHOOT */
 setInterval(()=>{
-  if(game) enemy.push({x:boss.x,y:boss.y});
-},800);
+  if(running) enemy.push({x:boss.x,y:boss.y});
+},700);
 
+/* MAIN LOOP (NEVER STOPS) */
 function loop(){
-  if(!game)return;
-
   ctx.clearRect(0,0,500,600);
 
-  if(keys["a"])player.x-=4;
-  if(keys["d"])player.x+=4;
-  if(keys["w"])player.y-=4;
-  if(keys["s"])player.y+=4;
+  if(running){
 
-  ctx.fillRect(player.x,player.y,10,10);
-  ctx.fillText("♡",boss.x,boss.y);
+    if(keys["a"])player.x-=4;
+    if(keys["d"])player.x+=4;
+    if(keys["w"])player.y-=4;
+    if(keys["s"])player.y+=4;
 
-  bullets.forEach((b,i)=>{
-    b.y-=6;
-    ctx.fillRect(b.x,b.y,3,6);
-    if(Math.abs(b.x-boss.x)<20&&Math.abs(b.y-boss.y)<20){
-      boss.hp-=2;bullets.splice(i,1);
+    ctx.fillRect(player.x,player.y,10,10);
+    ctx.fillText("♡",boss.x,boss.y);
+
+    bullets.forEach((b,i)=>{
+      b.y-=6;
+      ctx.fillRect(b.x,b.y,3,6);
+      if(Math.abs(b.x-boss.x)<20&&Math.abs(b.y-boss.y)<20){
+        boss.hp-=2;bullets.splice(i,1);
+      }
+    });
+
+    enemy.forEach((e,i)=>{
+      e.y+=4;
+      ctx.fillRect(e.x,e.y,4,4);
+      if(Math.abs(e.x-player.x)<10&&Math.abs(e.y-player.y)<10){
+        player.hp-=5;enemy.splice(i,1);
+      }
+    });
+
+    if(player.hp<=0){
+      voice.textContent="Again.";
+      running=false;
+      setTimeout(startBoss,1000);
     }
-  });
 
-  enemy.forEach((e,i)=>{
-    e.y+=4;
-    ctx.fillRect(e.x,e.y,4,4);
-    if(Math.abs(e.x-player.x)<10&&Math.abs(e.y-player.y)<10){
-      player.hp-=5;enemy.splice(i,1);
-      say("Careful.");
+    if(boss.hp<=0){
+      voice.textContent="...you win.";
+      running=false;
+      setTimeout(showMain,1200);
     }
-  });
-
-  if(player.hp<=0){
-    say("Again.");
-    setTimeout(startBoss,1200);
-    return;
-  }
-
-  if(boss.hp<=0){
-    game=false;
-    say("...you win.");
-    setTimeout(showMain,1200);
-    return;
   }
 
   requestAnimationFrame(loop);
 }
+loop();
 
-/* ===== MAIN PAGE ===== */
+/* ===== MAIN ===== */
 const bg=document.getElementById("bg");
 const title=document.getElementById("title");
 const btn=document.getElementById("openBtn");
@@ -287,8 +278,5 @@ newSeq();
 startRound();
 
 </script>
-</body>
-</html>
-
 </body>
 </html>
