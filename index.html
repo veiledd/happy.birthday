@@ -223,7 +223,8 @@ I can’t promise the world, but I can promise this: my heart is yours, in full,
 
 <script>
 
-/* ================= MEMORY (FIXED + UNBREAKABLE) ================= */
+/*
+/* ================= MEMORY (BULLETPROOF VERSION) ================= */
 
 const phrases = [
   "Chaos and fire dance in the night",
@@ -239,63 +240,95 @@ let round = 0;
 
 const text = document.getElementById("memoryText");
 const choices = document.getElementById("memoryChoices");
-const minigame = document.getElementById("minigame");
 
-function startGame() {
-  seq = [...phrases].sort(() => Math.random() - 0.5).slice(0, 3);
-  round = 0;
-  runRound();
+function log(msg){
+  console.log("[Memory]", msg);
 }
 
-function runRound() {
-  if (!seq.length || round >= seq.length) {
-    startBoss();
-    return;
+function startGame(){
+  try {
+    log("startGame");
+
+    seq = [...phrases]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
+
+    round = 0;
+
+    nextRound();
+  } catch (e) {
+    console.error("startGame error:", e);
   }
+}
 
-  const phrase = seq[round];
+function nextRound(){
+  try {
+    if (round >= seq.length) {
+      log("completed → boss");
+      startBoss();
+      return;
+    }
 
-  choices.innerHTML = "";
-  text.textContent = "Get ready...";
+    const phrase = seq[round];
 
-  // SAFE DELAY (no nested timeouts stacking forever)
-  setTimeout(() => {
-    text.textContent = phrase;
+    log("round " + round);
+
+    text.textContent = "Get ready...";
+    choices.innerHTML = "";
 
     setTimeout(() => {
-      text.textContent = "Pick it";
-      showChoices(phrase);
-    }, 1200);
+      text.textContent = phrase;
 
-  }, 700);
+      setTimeout(() => {
+        showChoices(phrase);
+      }, 900);
+
+    }, 600);
+
+  } catch (e) {
+    console.error("nextRound error:", e);
+  }
 }
 
-function showChoices(correct) {
-  choices.innerHTML = "";
+function showChoices(correct){
+  try {
+    log("showChoices");
 
-  const wrong = phrases.filter(p => p !== correct);
-  const opts = [correct, wrong[0], wrong[1]].sort(() => Math.random() - 0.5);
+    text.textContent = "Pick it";
+    choices.innerHTML = "";
 
-  opts.forEach(o => {
-    const b = document.createElement("button");
-    b.className = "opt-btn";
-    b.textContent = o;
+    const wrong = phrases.filter(p => p !== correct);
 
-    b.onclick = () => {
-      if (o === seq[round]) {
-        round++;
-        runRound();
-      } else {
-        startGame(); // restart clean
-      }
-    };
+    const opts = [correct, wrong[0], wrong[1]]
+      .sort(() => Math.random() - 0.5);
 
-    choices.appendChild(b);
-  });
+    opts.forEach(opt => {
+      const b = document.createElement("button");
+      b.className = "opt-btn";
+      b.textContent = opt;
+
+      b.onclick = () => {
+        if (opt === seq[round]) {
+          round++;
+          nextRound();
+        } else {
+          log("wrong → restart");
+          startGame();
+        }
+      };
+
+      choices.appendChild(b);
+    });
+
+  } catch (e) {
+    console.error("showChoices error:", e);
+    startGame();
+  }
 }
 
-/* START SAFELY AFTER DOM LOAD */
+/* SAFETY AUTO START */
 window.addEventListener("load", () => {
+  log("loaded");
   startGame();
 });
 
