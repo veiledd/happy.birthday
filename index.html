@@ -224,7 +224,7 @@ I can’t promise the world, but I can promise this: my heart is yours, in full,
 <script>
 
 /*
-/* ================= MEMORY (BULLETPROOF VERSION) ================= */
+/* ================= MEMORY GAME (FORCED STABLE FLOW) ================= */
 
 const phrases = [
   "Chaos and fire dance in the night",
@@ -240,98 +240,76 @@ let round = 0;
 
 const text = document.getElementById("memoryText");
 const choices = document.getElementById("memoryChoices");
+const minigame = document.getElementById("minigame");
 
-function log(msg){
-  console.log("[Memory]", msg);
+function startGame() {
+  seq = shuffle([...phrases]).slice(0, 3);
+  round = 0;
+  runRound();
 }
 
-function startGame(){
-  try {
-    log("startGame");
-
-    seq = [...phrases]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 3);
-
-    round = 0;
-
-    nextRound();
-  } catch (e) {
-    console.error("startGame error:", e);
+function runRound() {
+  if (round >= seq.length) {
+    startBoss();
+    return;
   }
-}
 
-function nextRound(){
-  try {
-    if (round >= seq.length) {
-      log("completed → boss");
-      startBoss();
-      return;
-    }
+  const phrase = seq[round];
 
-    const phrase = seq[round];
+  // FORCE UI RESET FIRST (prevents lock)
+  text.textContent = "Get ready...";
+  choices.innerHTML = "";
 
-    log("round " + round);
-
-    text.textContent = "Get ready...";
-    choices.innerHTML = "";
+  // single clean timer chain
+  setTimeout(() => {
+    text.textContent = phrase;
 
     setTimeout(() => {
-      text.textContent = phrase;
+      showChoices(phrase);
+    }, 900);
 
-      setTimeout(() => {
-        showChoices(phrase);
-      }, 900);
-
-    }, 600);
-
-  } catch (e) {
-    console.error("nextRound error:", e);
-  }
+  }, 600);
 }
 
-function showChoices(correct){
-  try {
-    log("showChoices");
+function showChoices(correct) {
+  text.textContent = "Pick it";
+  choices.innerHTML = "";
 
-    text.textContent = "Pick it";
-    choices.innerHTML = "";
+  const wrong = phrases.filter(p => p !== correct);
 
-    const wrong = phrases.filter(p => p !== correct);
+  const opts = shuffle([
+    correct,
+    wrong[0],
+    wrong[1]
+  ]);
 
-    const opts = [correct, wrong[0], wrong[1]]
-      .sort(() => Math.random() - 0.5);
+  opts.forEach(opt => {
+    const b = document.createElement("button");
+    b.className = "opt-btn";
+    b.textContent = opt;
 
-    opts.forEach(opt => {
-      const b = document.createElement("button");
-      b.className = "opt-btn";
-      b.textContent = opt;
+    b.onclick = () => {
+      if (opt === seq[round]) {
+        round++;
+        runRound();
+      } else {
+        startGame(); // full reset (prevents soft lock)
+      }
+    };
 
-      b.onclick = () => {
-        if (opt === seq[round]) {
-          round++;
-          nextRound();
-        } else {
-          log("wrong → restart");
-          startGame();
-        }
-      };
-
-      choices.appendChild(b);
-    });
-
-  } catch (e) {
-    console.error("showChoices error:", e);
-    startGame();
-  }
+    choices.appendChild(b);
+  });
 }
 
-/* SAFETY AUTO START */
+/* SAFE SHUFFLE */
+function shuffle(arr) {
+  return arr.sort(() => Math.random() - 0.5);
+}
+
+/* START ONLY ONCE DOM IS READY */
 window.addEventListener("load", () => {
-  log("loaded");
   startGame();
 });
-
 /* ================= BOSS ================= */
 const canvas=document.getElementById("bossCanvas");
 const ctx=canvas.getContext("2d");
