@@ -264,48 +264,75 @@ function loop(){
 
   ctx.clearRect(0,0,500,600);
 
-  if(keys["a"])p.x-=4;
-  if(keys["d"])p.x+=4;
-  if(keys["w"])p.y-=4;
-  if(keys["s"])p.y+=4;
+  /* ================= PLAYER MOVEMENT ================= */
+  if(keys["a"]) p.x -= 4;
+  if(keys["d"]) p.x += 4;
+  if(keys["w"]) p.y -= 4;
+  if(keys["s"]) p.y += 4;
 
-  b.x+=b.dir*2;
-  if(b.x>460||b.x<40)b.dir*=-1;
+  /* clamp */
+  p.x = Math.max(0, Math.min(490, p.x));
+  p.y = Math.max(0, Math.min(590, p.y));
 
-  ctx.fillRect(p.x,p.y,10,10);
-  ctx.fillText("♡",b.x,b.y);
+  /* ================= BOSS MOVEMENT ================= */
+  b.x += b.dir * 2;
+  if(b.x > 460 || b.x < 40) b.dir *= -1;
+
+  /* ================= DRAW PLAYER (FIXED VISIBILITY) ================= */
+  ctx.fillStyle = "#ff3b3b";
+  ctx.fillRect(p.x, p.y, 10, 10);
+
+  /* ================= DRAW BOSS (FIXED FONT + COLOR) ================= */
+  ctx.fillStyle = "#ff9b9b";
+  ctx.font = "30px serif";
+  ctx.fillText("♡", b.x, b.y);
+
+  /* ================= PLAYER BULLETS ================= */
+  ctx.fillStyle = "#ffffff";
 
   bullets.forEach((x,i)=>{
-    x.y+=x.dy;
-    ctx.fillRect(x.x,x.y,3,6);
+    x.y += x.dy;
+    ctx.fillRect(x.x, x.y, 3, 6);
 
-    if(Math.abs(x.x-b.x)<20&&Math.abs(x.y-b.y)<20){
-      b.hp-=3;
+    if(Math.abs(x.x - b.x) < 20 && Math.abs(x.y - b.y) < 20){
+      b.hp -= 3;
       bullets.splice(i,1);
     }
   });
 
-  enemy.forEach((x,i)=>{
-    x.x+=x.dx; x.y+=x.dy;
-    ctx.fillRect(x.x,x.y,4,4);
+  /* ================= ENEMY BULLETS ================= */
+  ctx.fillStyle = "#ff6666";
 
-    if(Math.abs(x.x-p.x)<10&&Math.abs(x.y-p.y)<10){
-      p.hp-=6;
+  enemy.forEach((x,i)=>{
+    x.x += x.dx;
+    x.y += x.dy;
+
+    ctx.fillRect(x.x, x.y, 4, 4);
+
+    if(Math.abs(x.x - p.x) < 10 && Math.abs(x.y - p.y) < 10){
+      p.hp -= 6;
       enemy.splice(i,1);
     }
   });
 
-  if(p.hp<=0){
-    game=false;
-    say("Again.");
-    setTimeout(startBoss,1000);
+  /* ================= UI ================= */
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "16px Arial";
+  ctx.fillText("HP: " + p.hp, 10, 20);
+  ctx.fillText("BOSS: " + b.hp, 350, 20);
+
+  /* ================= WIN / LOSE ================= */
+  if(p.hp <= 0){
+    game = false;
+    say("Try again.");
+    setTimeout(startBoss, 1000);
     return;
   }
 
-  if(b.hp<=0){
-    game=false;
-    say("…you stayed.");
-    setTimeout(showMain,1200);
+  if(b.hp <= 0){
+    game = false;
+    say("...");
+    setTimeout(showMain, 1200);
     return;
   }
 
